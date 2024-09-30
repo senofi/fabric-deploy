@@ -1,11 +1,15 @@
 # README #
 
-Consortia Hyperledger Fabric Ansible playbooks
+Deploy Hyperledger Fabric Ansible playbooks
 
 ### What is this repository for? ###
 
-Holds ansible playbooks for setting up hyperledger fabric network. The playbooks are imported and used in Asnible Tower projects.
-The repository provides a different branch for every Hyperledger Fabric release.
+Ansible playbooks for deploying up hyperledger fabric nodes and fabric operation console on Linux using docker containers.
+
+
+### Deployment landscape
+![](docs/LandscapeModel.jpg?raw=true)
+
 
 
 ### How do I get set up? ###
