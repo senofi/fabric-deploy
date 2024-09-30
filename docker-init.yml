@@ -1,7 +1,0 @@
----
-- hosts: "{{ target_machine }}"
-  become: yes
-
-  tasks:
-    - include_role:
-        name: docker-init
