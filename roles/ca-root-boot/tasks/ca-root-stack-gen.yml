@@ -1,0 +1,37 @@
+---
+- set_fact:
+    msp: "{{ msp_var }}"
+
+- block:
+  - name: "Reset  {{ ca_var.home }}"
+    become: yes
+    file:
+      state: absent
+      path: "{{ ca_var.home }}"
+    loop: "{{ msp.cas }}"
+    loop_control:
+      loop_var: ca_var
+    when: msp.cas is defined and ca_var.home is defined and ca_var.reset is defined and ca_var.reset == "yes"
+  become: yes
+  become_user: root
+
+- name: Create {{ ca_var.home }}
+  file:
+    state: directory
+    path: "{{ ca_var.home }}"
+  loop: "{{ msp.cas }}"
+  loop_control:
+    loop_var: ca_var
+  when: msp.cas is defined and ca_var.home is defined
+
+- name: "Generate stack file for CAs of organization '{{ msp.msp }}'"
+  template:
+    src: "docker/stack_root_ca.yaml.j2"
+    dest: "{{ config_folder }}/stack_{{ msp.stack_ca }}.yaml"
+    trim_blocks: no
+    variable_start_string: "[["
+    variable_end_string: "]]"
+
+- name: Backup the stack file
+  shell: >
+    cp -r {{ config_folder }}/stack_{{ msp.stack_ca }}.yaml {{ config_folder }}/stack_{{ msp.stack_ca }}_{{ansible_date_time.iso8601_basic_short}}.yaml

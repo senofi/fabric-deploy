@@ -1,0 +1,8 @@
+---
+# Approves a chaincode definition
+
+- hosts: "{{ ca_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  roles:
+    - cc-approve-definition

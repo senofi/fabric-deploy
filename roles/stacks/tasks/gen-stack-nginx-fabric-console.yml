@@ -1,0 +1,21 @@
+---
+- file:
+    path: "{{fabric_console_config_folder_path}}"
+    state: directory
+    mode: "u=rwx,g=r"
+    owner: "{{ fabric_user_name }}"
+  become_user: root
+
+- name: "Generate nginx farbic operations console stack"
+  become_user: root
+  template:
+    src: "docker/stack_nginx_fabric_ops_console.yaml.j2"
+    dest: "{{fabric_console_config_folder_path}}/stack_nginx_fabric_console{{ fabric_console_nginx_stack }}.yaml"
+    trim_blocks: no
+    variable_start_string: "[["
+    variable_end_string: "]]"
+
+
+- name: Backup the stack file
+  shell: >
+    cp -r {{fabric_console_config_folder_path}}/stack_nginx_fabric_console{{ fabric_console_nginx_stack }}.yaml {{fabric_console_config_folder_path}}/stack_nginx_fabric_console{{ fabric_console_nginx_stack }}_{{ansible_date_time.iso8601_basic_short}}.yaml

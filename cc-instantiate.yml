@@ -1,0 +1,9 @@
+---
+# Instantiates a chain code a a prticular peer and submits the transaction to the ordering service  
+
+- hosts: "{{ ca_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  roles:
+    # - setup
+    - cc-instantiate

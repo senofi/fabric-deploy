@@ -1,0 +1,10 @@
+---
+# The purpose is to copy the signing cert of the admin user of the node to the node PKI folder
+- set_fact:
+    entity: "{{ itm }}"
+    msp: "{{ en_msp }}"
+
+- name: Copy the Admin user of the MSP certs to common msp certs folder
+  shell: >
+    mkdir -p {{ certs_folder }}/{{ msp.domain }}/msp/admincerts/ && cp -r {{ local_pki_folder }}/{{ msp.domain }}/users/{{ entity.user }}/msp/signcerts/* {{ certs_folder }}/{{ msp.domain }}/msp/admincerts/
+  when: entity.type == "user" and entity.role is defined and entity.role == "peer.admin"

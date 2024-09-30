@@ -1,0 +1,5 @@
+---
+- hosts: "{{ manager_machine }}"
+  roles:
+   - docker-swarm-labels-add
+      host_item="{{ node_machine }}"

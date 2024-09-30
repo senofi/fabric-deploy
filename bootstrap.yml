@@ -1,0 +1,14 @@
+---
+# Bootstraps an MSP by starting from scratch, MSP CA, nodes enrollment and starting the network
+- hosts: all
+  become: yes
+  become_user: "{{ server_user }}"
+  
+  roles:
+    - setup
+    - ca-root-boot
+    - register
+    - enroll
+    - download-certs
+    - stacks
+    - start

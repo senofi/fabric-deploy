@@ -1,0 +1,33 @@
+{
+    "api_url": "grpcs://[[ peer_endpoint_host ]]:[[peer_endpoint_port]]",
+    "display_name": "[[ peer_name ]]",
+    "grpcwp_url": "[[webproxy_endpoint_url]]",
+    "id": "[[ peer_name ]]",    
+    "msp": {
+        "ca": {
+            "root_certs": [
+                "[[ca_root_cert]]"
+            ]
+        },
+        "component": {
+            "admin_certs": [
+                "[[msp_admin_cert]]"
+            ],
+            "ecert": "[[peer_cert]]",
+            "tls_cert": "[[peer_tls_cert]]"
+        },
+        "tlsca": {
+            "root_certs": [
+                "[[ ca_tls_root_cert ]]"
+            ]
+        }
+    },
+    "msp_id": "[[msp_name]]",
+    "name": "[[peer_name]]",
+    "operations_url": "[[ peer_ops_endpoint_url ]]",
+    "pem": "[[peer_cert]]",
+    "scheme_version": "v1",
+    "tls_ca_root_cert": "[[ ca_tls_root_cert ]]",
+    "tls_cert": "[[peer_tls_cert]]",
+    "type": "fabric-peer"
+}

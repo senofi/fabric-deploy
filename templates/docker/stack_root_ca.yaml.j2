@@ -1,0 +1,57 @@
+version: "3.6"
+services:
+{% for ca in msp.cas %}
+  [[ ca.ca ]]:
+    networks:
+      [[ msp.network_ca ]]:
+        aliases:
+          - [[ ca.ca ]]{% if ca.aliases is defined %}
+{% for alias in ca.aliases %}
+          -  [[ alias ]]
+{% endfor %}{% endif %}{% if ca.labels is defined %}
+    deploy:
+      placement:
+        constraints:{% for label in ca.labels %}
+          - [[ label ]]
+          {% endfor %}{% endif %}
+    image: hyperledger/fabric-ca{% if fab_ca_img_tag is defined %}:[[ fab_ca_img_tag ]]{% endif %}
+    environment:
+      - FABRIC_CA_SERVER_SIGNING_DEFAULT_EXPIRY=43800h
+      - FABRIC_CA_SERVER_SIGNING_PROFILES_TLS_EXPIRY=43800h
+      - FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS=:8443
+      - FABRIC_CA_SERVER_OPERATIONS_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_OPERATIONS_TLS_CERTFILE=/etc/hyperledger/fabric-ca-tls-certs/cert.crt
+      - FABRIC_CA_SERVER_OPERATIONS_TLS_KEYFILE=/etc/hyperledger/fabric-ca-tls-certs/key.key
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server-[[ ca.ca ]]
+      - FABRIC_CA_SERVER_CA_NAME=[[ ca.ca ]]{% if ca.cert is defined and ca.key is defined %}
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-certs/[[ ca.cert ]]
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-certs/[[ ca.key ]]{% endif %}
+      - FABRIC_CA_SERVER_CSR_CN=[[ ca.ca ]].[[ msp.domain ]]{% if msp.tls_ca is undefined or msp.tls_ca != "yes" %}
+      - FABRIC_CA_SERVER_METRICS_PROVIDER=prometheus
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-tls-certs/cert.crt
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-tls-certs/key.key
+      - FABRIC_CA_SERVER_TLS_CLIENTAUTH_CERTFILES=/etc/hyperledger/fabric-ca-tls-certs/ca.crt
+# Mutual TLS is not suported in fabric console
+#      - FABRIC_CA_SERVER_TLS_CLIENTAUTH_TYPE=requireandverifyclientcert
+      - FABRIC_CA_SERVER_TLS_CLIENTAUTH_TYPE=noclientcert{% endif %}
+    command: sh -c 'fabric-ca-server start -b {% if ca.user is defined %}[[ ca.user ]]{% else %}admin{% endif %}:adminpw'
+
+    volumes:{% if ca.ca_cert_folder is defined %}
+      - [[ ca.ca_cert_folder ]]:/etc/hyperledger/fabric-ca-server-certs{% endif %}{% if ca.home is defined %}
+      - [[ ca.home ]]:/etc/hyperledger/fabric-ca-server-[[ ca.ca ]]{% endif %}{% if msp.tls_ca is undefined or msp.tls_ca != "yes" %}
+      - [[ local_pki_folder ]]/tls.[[ msp.domain ]]/peers/server/tls:/etc/hyperledger/fabric-ca-tls-certs
+      - [[ local_pki_folder ]]/tls.[[ msp.domain ]]/users/client/tls:/etc/hyperledger/fabric-ca-tls-certs-client{% endif %}
+    ports:
+      - [[ ca.port ]]:7054
+      - [[ ca.ops_port ]]:7054
+{% endfor %}
+
+networks:
+  [[ msp.network_ca ]]:
+    driver: overlay
+    attachable: true
+    ipam:
+      driver: default
+      config:
+        - subnet: [[ msp.subnet_cidr_ca ]]

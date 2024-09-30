@@ -1,0 +1,8 @@
+---
+# Removes the web application constainer
+
+- hosts: "{{ manager_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  roles:
+    - app-remove

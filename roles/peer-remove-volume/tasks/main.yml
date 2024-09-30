@@ -1,0 +1,10 @@
+- name: Remove the node volume
+  docker_volume:
+    name: "{{ node.stack }}_{{ node.id }}"
+    state: absent
+
+- name: Remove the node couchDB volume if present
+  docker_volume:
+    name: "{{ node.stack }}_{{ node.id }}_cDB"
+    state: absent
+  when: peer is defined

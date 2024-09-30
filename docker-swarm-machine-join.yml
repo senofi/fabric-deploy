@@ -1,0 +1,4 @@
+---
+- hosts: "{{ node_machine }}"
+  roles:
+   - docker-swarm-machine-join

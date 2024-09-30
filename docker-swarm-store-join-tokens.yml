@@ -1,0 +1,4 @@
+---
+- hosts: "{{ manager_machine }}"
+  roles:
+   - docker-swarm-store-join-tokens

@@ -1,0 +1,11 @@
+---
+# Adds a new MSP on a channel
+- hosts: "{{ ca_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  roles:
+    #- channel-msp-add-generate-transaction
+    # - extract-transaction
+    - sign-transaction
+    # - extract-transaction-signature
+    - submit-transaction

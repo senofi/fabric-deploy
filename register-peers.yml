@@ -1,0 +1,8 @@
+---
+# Bootstraps new peers of MSP.
+- hosts: all
+  become: yes
+  become_user: "{{ server_user }}"
+  
+  roles:
+    - register

@@ -1,0 +1,4 @@
+---
+- hosts: master-node
+  roles:
+   - docker-swarm-labels

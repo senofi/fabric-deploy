@@ -1,0 +1,7 @@
+---
+- hosts: "{{ target_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  tasks:
+    - include_role:
+        name: export-console-peer-config

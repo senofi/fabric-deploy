@@ -1,0 +1,11 @@
+---
+- set_fact:
+    mspc: "{{ reg_msp }}"
+
+- include_tasks: register-for-ca.yml
+  vars:
+    msp_def: "{{ mspc }}"
+  loop: "{{ mspc.cas }}"
+  loop_control:
+    loop_var: reg_ca
+  when: mspc.cas is defined

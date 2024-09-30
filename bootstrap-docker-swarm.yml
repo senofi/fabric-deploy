@@ -1,0 +1,43 @@
+---
+#Install python on all target machines in order to enable ansible modules
+- hosts: all
+  become: yes
+  gather_facts: false
+  pre_tasks:
+  - name: Install python
+    raw: bash -c "test -e /usr/bin/python || (sudo apt -qqy update && sudo apt install -qqy python-minimal)"
+    register: output
+    changed_when: output.stdout != ""
+
+- hosts: all
+  become: yes
+  pre_tasks:
+  - name: Install acl
+    apt: pkg=acl
+
+#Create users
+- hosts: all
+  roles:
+    - create-user
+
+#Install docker engine (docker CE) and required packages on all target machines
+- hosts: all
+  roles:
+    - install-docker
+
+#Bring up the docker swarm cluster
+- hosts: master-node
+  roles:
+   - docker-swarm-master
+
+- hosts: manager-nodes
+  roles:
+   - docker-swarm-manager
+
+- hosts: worker-nodes
+  roles:
+   - docker-swarm-worker
+
+- hosts: master-node
+  roles:
+   - docker-swarm-labels

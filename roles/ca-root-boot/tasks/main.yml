@@ -1,0 +1,15 @@
+---
+########################## Boot TLS CA - issue ofr TLS certificates for the MSP CAs
+- name: Debug
+  debug:
+    msg: "################## CA Bootstrap Start  ##################"
+#Bootstrap for MSPs
+- include_tasks: boot-single.yml
+  loop: "{{ msps }}"
+  loop_control:
+    loop_var: msp_itm
+  when: msps is defined and ( msp_itm.tls_ca is undefined or msp_itm.tls_ca != "yes" )
+
+- name: Debug
+  debug:
+    msg: "################## CA Bootstrap Finish  ##################"

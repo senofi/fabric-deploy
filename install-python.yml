@@ -1,0 +1,11 @@
+---
+- hosts: all
+  become: yes
+
+  gather_facts: false
+  pre_tasks:
+
+  - name: Install python
+    raw: bash -c "test -e /usr/bin/python || (sudo apt -qqy update && sudo apt install -qqy python-minimal)"
+    register: output
+    changed_when: output.stdout != ""

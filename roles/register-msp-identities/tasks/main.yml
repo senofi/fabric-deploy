@@ -1,0 +1,11 @@
+---
+#Requires as input a single MSP var named register_msp
+- name: Debug
+  debug:
+    msg: "################## Register users of  {{ register_msp.msp }} ##################"
+
+- include_tasks: register.yml
+
+- name: Debug
+  debug:
+    msg: "################## Register users of {{ register_msp.msp }} End  ##################"

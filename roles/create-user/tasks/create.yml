@@ -1,0 +1,16 @@
+---
+
+- name: Create a 'fabric' user group
+  become: yes
+  group:
+    name: "{{ fabric_user_group }}"
+    state: present
+
+- name: Create Fabric User
+  become: yes
+  user: 
+    name: "{{ fabric_user_name }}"
+    generate_ssh_key: no
+    groups:
+      - "{{ fabric_user_group }}"
+    state: present

@@ -1,0 +1,73 @@
+---
+
+# {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/msp/keystore/key.key
+
+# - name: Copy identity key to common MSP folder
+#   shell: >
+#     mkdir -p {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/msp/keystore/ && cp -r {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/{{ ca.ca }}/msp/keystore/* {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/msp/keystore/key.key
+#   loop: "{{ ca.users }}"
+#   loop_control:
+#     loop_var: user_ca
+#   when: ca.users is defined and (ca.tls is undefined or ca.tls != true)
+
+- set_fact:
+    f_path: "{{ local_pki_folder }}/{{ vault_msp.domain }}/{{ vault_user.type }}s/{{ vault_user.user }}" 
+
+- set_fact:
+    key_path: "{{ f_path }}/tls/key.key"
+  when: vault_ca.tls == true
+
+- set_fact:
+    key_path: "{{ f_path }}/msp/keystore/key.key"
+  when: vault_ca.tls != true
+
+- set_fact:
+    cert_path: "{{ f_path }}/tls/cert.crt"
+  when: vault_ca.tls == true
+
+- set_fact:
+    cert_path: "{{ f_path }}/msp/signcerts/cert.pem"
+  when: vault_ca.tls != true
+
+- set_fact:
+    ca_cert_path: "{{ f_path }}/tls/ca.crt"
+  when: vault_ca.tls == true
+
+- set_fact:
+    ca_cert_path: "{{ f_path }}/msp/cacerts/ca.cert"
+  when: vault_ca.tls != true
+
+- set_fact:
+    ca_type: "msp"
+  when: vault_ca.tls != true
+
+- set_fact:
+    ca_type: "tls"
+  when: vault_ca.tls == true
+
+- set_fact:
+    vault_identity: "{ \"msp\": \"{{ vault_msp.msp }}\", \"id\": \"{{ vault_user.user }}\", \"secret\": { \"path\":\"{{ key_path }}\",\"type\":\"key\",\"ca\":\"{{ ca_type }}\" } }"
+
+- name: Push the identity key to vault {{vault_identity}}
+  include_role:
+    name: upload-secret-vault
+  vars:
+    vault_create_identity: "{{ vault_identity | from_json }}"
+
+- set_fact:
+    vault_identity: "{\"msp\": \"{{ vault_msp.msp }}\", \"id\": \"{{ vault_user.user }}\", \"secret\": { \"path\":\"{{ cert_path }}\",\"type\":\"cert\",\"ca\":\"{{ ca_type }}\" } }"
+
+- name: Push the identity cert to vault {{vault_identity}}
+  include_role:
+    name: upload-secret-vault
+  vars:
+    vault_create_identity: "{{ vault_identity | from_json }}"
+
+- set_fact:
+    vault_identity: "{ \"msp\": \"{{ vault_msp.msp }}\", \"id\": \"{{ vault_user.user }}\", \"secret\": { \"path\":\"{{ ca_cert_path }}\",\"type\":\"ca\",\"ca\":\"{{ ca_type }}\" } }"
+
+- name: Push the ca cert to vault {{vault_identity}}
+  include_role:
+    name: upload-secret-vault
+  vars:
+    vault_create_identity: "{{ vault_identity | from_json }}"

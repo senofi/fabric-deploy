@@ -1,0 +1,39 @@
+---
+#Install python on all target machines in order to enable ansible modules
+- hosts: "{{ node_machine }}"
+  become: yes
+  gather_facts: false
+  pre_tasks:
+  - name: Install python
+    raw: bash -c "test -e /usr/bin/python || (sudo apt -qqy update && sudo apt install -qqy python-minimal)"
+    register: output
+    changed_when: output.stdout != ""
+
+- hosts: "{{ node_machine }}"
+  become: yes
+  pre_tasks:
+  - name: Install acl
+    apt: pkg=acl
+
+#Create users
+- hosts: "{{ node_machine }}"
+  roles:
+    - create-user
+
+#Install docker engine (docker CE) and required packages on all target machines
+- hosts: "{{ node_machine }}"
+  roles:
+    - install-docker
+
+#Join the machine to the swarm cluster
+- hosts: "{{ manager_machine }}"
+  roles:
+   - docker-swarm-store-join-tokens
+
+- hosts: "{{ node_machine }}"
+  roles:
+   - docker-swarm-machine-join
+
+- hosts: "{{ manager_machine }}"
+  roles:
+   - docker-swarm-labels-add-peer-machine

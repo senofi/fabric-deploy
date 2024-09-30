@@ -1,0 +1,11 @@
+---
+# Bootstraps new client peers of MSP.
+- hosts: all
+  become: yes
+  become_user: "{{ server_user }}"
+  
+  roles:
+    - setup
+    - upload-certs
+    - stacks
+    - start

@@ -1,0 +1,18 @@
+# Copyright Senofi Inc.
+# This template is used to generate the peer confg yaml file to enable the OU 
+
+---
+NodeOUs:
+  Enable: true
+  ClientOUIdentifier:
+    Certificate: "cacerts/ca.cert"
+    OrganizationalUnitIdentifier: "client"
+  AdminOUIdentifier:
+    Certificate: "cacerts/ca.cert"
+    OrganizationalUnitIdentifier: "admin"
+  PeerOUIdentifier:
+    Certificate: "cacerts/ca.cert"
+    OrganizationalUnitIdentifier: "peer"
+  OrdererOUIdentifier:
+    Certificate: "cacerts/ca.cert"
+    OrganizationalUnitIdentifier: "orderer"

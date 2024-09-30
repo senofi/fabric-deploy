@@ -1,0 +1,27 @@
+---
+# The purpose is to copy the signing cert of the admin user of the node to the node PKI folder
+- set_fact:
+    entity: "{{ itm }}"
+    msp: "{{ en_msp }}"
+
+- name: Copy admin MSP certs to peer msp folder
+  shell: >
+    mkdir -p {{ local_pki_folder }}/{{ msp.domain }}/{{ entity.type }}s/{{ entity.user }}/msp/admincerts/ && cp -r {{ certs_folder }}/{{ msp.domain }}/msp/admincerts/* {{ local_pki_folder }}/{{ msp.domain }}/{{ entity.type }}s/{{ entity.user }}/msp/admincerts/
+  when: entity.type == "peer" or entity.type == "orderer"
+
+- file:
+    path: "{{ data_folder }}/{{ msp.domain }}/peers/{{ entity.user }}"
+    state: directory
+    mode: "u=rwx,g=r"
+    owner: "{{ fabric_user_name }}"
+  become_user: root
+  when: entity.type == "peer"
+
+- file:
+    path: "{{ data_folder }}/{{ msp.domain }}/orderers/{{ entity.user }}"
+    state: directory
+    mode: "u=rwx,g=r"
+    owner: "{{ fabric_user_name }}"
+  become_user: root
+  when: entity.type == "orderer"
+

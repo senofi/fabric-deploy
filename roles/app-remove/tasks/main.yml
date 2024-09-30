@@ -1,0 +1,13 @@
+- name: Remove the old service
+  become: yes
+  become_user: "{{ fabric_user_name }}"
+  docker_swarm_service:
+    name: "{{ app.stack }}_{{ app.id }}"
+    state: absent
+
+- name: Remove the related secret of the old service
+  become: yes
+  become_user: "{{ fabric_user_name }}"
+  docker_secret:
+    name: "{{ app.stack }}_network_config_{{ app.id }}"
+    state: absent

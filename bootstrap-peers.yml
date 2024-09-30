@@ -1,0 +1,12 @@
+---
+# Bootstraps new peers of MSP.
+- hosts: "{{ manager_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  
+  roles:
+    - register
+    - enroll
+    - download-certs
+    - stacks
+    - start

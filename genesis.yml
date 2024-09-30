@@ -1,0 +1,9 @@
+---
+# Generates the genesis block of the oredering service
+# Expects all needed CA certs to be available on the file system where the genesis block will be generated
+- hosts: all
+  become: yes
+  become_user: "{{ server_user }}"
+  
+  roles:
+    - genesis

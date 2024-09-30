@@ -1,0 +1,8 @@
+---
+# Fetches the approvals of a chiancode definition
+
+- hosts: "{{ ca_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  roles:
+    - cc-refresh-approvals

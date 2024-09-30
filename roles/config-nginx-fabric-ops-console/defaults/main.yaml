@@ -1,0 +1,13 @@
+---
+fabric_user_name: "fabric"
+env_id: test
+root_working_folder: "/srv/fabric"
+config_folder: "{{root_working_folder}}/{{env_id}}/config"
+fabric_console_config_folder_path: "{{ config_folder }}/fabric_console"
+
+fabric_console_network: console
+
+nginx_ops_console_tls_city: LA
+fabric_console_domain_name: localhost
+fabric_console_nginx_image: nginx
+fabric_console_nginx_port: 9000

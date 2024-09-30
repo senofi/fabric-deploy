@@ -1,0 +1,8 @@
+---
+# Generate channel transaction configuration file requried to create a channel
+- hosts: all
+  become: yes
+  become_user: "{{ server_user }}"
+  
+  roles:
+    - anchor-tx

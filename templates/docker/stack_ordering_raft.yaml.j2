@@ -1,0 +1,100 @@
+﻿version: "3.6"
+services:
+{% for orderer in msp.orderers %}
+  [[ orderer.orderer ]]:
+    networks:
+      [[ msp.network ]]:
+        aliases:
+          - [[ orderer.orderer ]]{% if orderer.aliases is defined %}
+{% for alias in orderer.aliases %}
+          -  [[ alias ]]
+{% endfor %}{% endif %}
+    {% if orderer.labels is defined %}
+    deploy:
+      placement:
+        constraints:
+{% for label in orderer.labels %}
+          - [[ label ]]{% endfor %}{% endif %}
+    image: hyperledger/fabric-orderer{% if fab_img_tag is defined %}:[[ fab_img_tag ]]{% endif %}
+    environment:
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${STACK}_[[ msp.network ]]
+      - FABRIC_LOGGING_SPEC=[[ msp.log_level ]]
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_OPERATIONS_LISTENADDRESS=:8443
+      - ORDERER_OPERATIONS_TLS_ENABLED=false
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=[[ msp.msp ]]
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      - ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/var/hyperledger/orderer/tls/cert.crt
+      - ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/var/hyperledger/orderer/tls/key.key
+      - ORDERER_GENERAL_CLUSTER_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_METRICS_PROVIDER=prometheus
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/key.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/cert.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - CONFIGTX_ORDERER_ORDERERTYPE=[[ msp.type ]]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    secrets:
+      - source: genesis
+        target: /var/hyperledger/orderer/orderer.genesis.block
+      - source: tls_key_[[ orderer.orderer ]]
+        target: /var/hyperledger/orderer/tls/key.key
+      - source: tls_cert_[[ orderer.orderer ]]
+        target: /var/hyperledger/orderer/tls/cert.crt
+      - source: tls_ca_[[ orderer.orderer ]]
+        target: /var/hyperledger/orderer/tls/ca.crt
+      - source: msp_admin_[[ orderer.orderer ]]
+        target: /var/hyperledger/orderer/msp/admincerts/cert.pem
+      - source: msp_key_[[ orderer.orderer ]]
+        target: /var/hyperledger/orderer/msp/keystore/key.key
+      - source: msp_sign_cert_[[ orderer.orderer ]]
+        target: /var/hyperledger/orderer/msp/signcerts/cert.pem
+      - source: msp_ca_[[ orderer.orderer ]]
+        target: /var/hyperledger/orderer/msp/cacerts/ca.cert
+    volumes:
+    - [[ orderer.orderer ]]:/var/hyperledger/production/orderer
+    ports:
+      - [[ orderer.port ]]:7050
+
+{% endfor %}
+
+
+volumes:
+{% for orderer in msp.orderers %}
+  [[ orderer.orderer ]]:
+{% endfor %}
+
+secrets:
+  genesis:
+    file: [[ config_folder ]]/configtx_[[ msp.msp ]]/genesis_[[ msp.msp ]].block
+{% for orderer in msp.orderers %}
+  tls_key_[[ orderer.orderer ]]:
+      file: [[ local_pki_folder ]]/[[ msp.domain ]]/orderers/[[ orderer.orderer ]]/tls/key.key
+  tls_cert_[[ orderer.orderer ]]:
+      file: [[ local_pki_folder ]]/[[ msp.domain ]]/orderers/[[ orderer.orderer ]]/tls/cert.crt
+  tls_ca_[[ orderer.orderer ]]:
+      file: [[ local_pki_folder ]]/[[ msp.domain ]]/orderers/[[ orderer.orderer ]]/tls/ca.crt
+
+  msp_admin_[[ orderer.orderer ]]:
+      file: [[ local_pki_folder ]]/[[ msp.domain ]]/orderers/[[ orderer.orderer ]]/msp/admincerts/cert.pem
+  msp_key_[[ orderer.orderer ]]:
+      file: [[ local_pki_folder ]]/[[ msp.domain ]]/orderers/[[ orderer.orderer ]]/msp/keystore/key.key
+  msp_sign_cert_[[ orderer.orderer ]]:
+      file: [[ local_pki_folder ]]/[[ msp.domain ]]/orderers/[[ orderer.orderer ]]/msp/signcerts/cert.pem
+  msp_ca_[[ orderer.orderer ]]:
+      file: [[ local_pki_folder ]]/[[ msp.domain ]]/orderers/[[ orderer.orderer ]]/msp/cacerts/ca.cert
+
+{% endfor %}
+
+networks:
+  [[ msp.network ]]:
+    driver: overlay
+    attachable: true
+    ipam:
+      driver: default
+      config:
+        - subnet: [[ msp.subnet_cidr ]]

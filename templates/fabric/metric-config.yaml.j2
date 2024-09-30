@@ -1,0 +1,14 @@
+global: 
+  scrape_interval: 15s 
+  evaluation_interval: 15s 
+scrape_configs: 
+- job_name: 'fabric_metrics' 
+  scrape_interval: 10s 
+  static_configs:
+  - targets: [{% for node in metric_deploy_msp.nodes %} '[[node.node]]:8443',{% endfor %} ]
+remote_write: {% if msp.prometheus.external.remote_write is defined %}
+- url: [[msp.prometheus.external.remote_write.url]]
+  name: consortia-external
+  basic_auth:
+    username: [[metric_deploy_msp.prometheus.external.remote_write.username]]
+    password: [[metric_deploy_msp.prometheus.external.remote_write.password]]{% endif %}

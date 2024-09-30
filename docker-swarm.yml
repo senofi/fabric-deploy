@@ -1,0 +1,18 @@
+---
+- hosts: master-node
+  become: yes
+  become_user: docker
+  roles:
+   - docker-swarm-master
+
+- hosts: manager-nodes
+  become: yes
+  become_user: docker
+  roles:
+   - docker-swarm-manager
+
+- hosts: worker-nodes
+  become: yes
+  become_user: docker
+  roles:
+   - docker-swarm-worker

@@ -1,0 +1,29 @@
+---
+- set_fact:
+    msp: "{{ msp_itm }}"
+
+
+- name: Debug
+  debug:
+    msg: "################## Boot MSP {{msp_itm}} ##################"
+
+#Bootstrap the CAs for the current an organization
+- include_tasks: gen-folders.yml
+  vars:
+    msp_var: "{{ msp }}"
+  when: actionTag is undefined or actionTag == "prepare"
+
+- include_tasks: ca-root-stack-gen.yml
+  vars:
+    msp_var: "{{ msp }}"
+  when: actionTag is undefined or actionTag == "start"
+
+- include_tasks: ca-root-stack-start.yml
+  vars:
+    msp_var: "{{ msp }}"
+  when: actionTag is undefined or actionTag == "start"
+
+- include_tasks: enroll-boostrap-user.yml
+  vars:
+    msp_var: "{{ msp }}"
+  when: actionTag is undefined or actionTag == "registerEnroll"

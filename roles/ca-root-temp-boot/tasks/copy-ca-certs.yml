@@ -1,0 +1,24 @@
+---
+- set_fact:
+    ca: "{{ enroll_ca }}"
+    msp: "{{ enroll_msp }}"
+
+- name: Create {{ certs_folder }}/{{ msp.domain }}/msp/cacerts
+  file:
+    state: directory
+    path: "{{ certs_folder }}/{{ msp.domain }}/msp/cacerts"
+
+- name: Create {{ certs_folder }}/{{ msp.domain }}/msp/tlscacerts
+  file:
+    state: directory
+    path: "{{ certs_folder }}/{{ msp.domain }}/msp/tlscacerts"
+
+- name: Copy TLSCA certs to MSP certs folder - from {{ local_pki_folder }}/{{ msp.domain }}/fabric-ca/{{ ca.ca }}/clients/{{ ca.user }}/msp/cacerts to {{ certs_folder }}/{{ msp.domain }}
+  shell: >
+    cp -r {{ local_pki_folder }}/{{ msp.domain }}/fabric-ca/{{ ca.ca }}/clients/{{ ca.user }}/msp/cacerts/* {{ certs_folder }}/{{ msp.domain }}/msp/tlscacerts/cert.pem
+  when: ca.tls is defined and ca.tls == true
+
+- name: Copy CA certs to MSP certs folder - from {{ local_pki_folder }}/{{ msp.domain }}/fabric-ca/{{ ca.ca }}/clients/{{ ca.user }}/msp/cacerts to {{ certs_folder }}/{{ msp.domain }}
+  shell: >
+    cp -r {{ local_pki_folder }}/{{ msp.domain }}/fabric-ca/{{ ca.ca }}/clients/{{ ca.user }}/msp/cacerts/* {{ certs_folder }}/{{ msp.domain }}/msp/cacerts/cert.pem
+  when: ca.tls is undefined or ca.tls != true

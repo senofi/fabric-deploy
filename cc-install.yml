@@ -1,0 +1,10 @@
+---
+# Builds a package out of a chaincode project on the file system
+# The chaincode package will be signed by the administrator of the MSP
+
+- hosts: "{{ ca_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  roles:
+    # - setup
+    - cc-install

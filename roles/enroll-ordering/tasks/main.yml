@@ -1,0 +1,17 @@
+---
+- name: Debug
+  debug:
+    msg: "###### Enroll identities of the Ordering Service as defined in the list under ordering variable ###############"
+
+- name: Enroll the users defined in the ordering list
+  include_role:
+    name: enroll-msp-identities
+  vars:
+    enrollment_msp: "{{ en_msp }}"
+  loop: "{{ ordering }}"
+  loop_control:
+    loop_var: en_msp
+
+- name: Debug
+  debug:
+    msg: "###### Enroll identities of the Ordering Service finished ###############"

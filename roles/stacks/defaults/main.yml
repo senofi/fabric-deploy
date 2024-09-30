@@ -1,0 +1,7 @@
+---
+fabric_user_name: "fabric"
+fabric_console_config_folder_path: "{{ config_folder }}/fabric_console"
+env_id: test
+root_working_folder: "/srv/fabric"
+config_folder: "{{root_working_folder}}/{{env_id}}/config"
+

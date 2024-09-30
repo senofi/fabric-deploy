@@ -1,0 +1,30 @@
+- set_fact:
+    msp: "{{ msp_var }}"
+
+- file:
+    path: "{{ data_folder }}/{{ msp.domain }}/peers/{{ peer.peer }}"
+    state: directory
+    mode: "u=rwx,g=r"
+    owner: "{{ fabric_user_name }}"
+  become_user: root
+  loop: "{{ msp.peers }}"
+  loop_control:
+    loop_var: peer
+  when: msp.peers is defined
+
+
+- file:
+    path: "{{ config_folder }}/{{ msp.domain }}/channel-artifacts"
+    state: directory
+    mode: "u=rwx,g=r"
+    owner: "{{ fabric_user_name }}"
+  become_user: root
+  when: msp.client is defined
+
+- file:
+    path: "{{ config_folder }}/{{ msp.domain }}/chaincode"
+    state: directory
+    mode: "u=rwx,g=r"
+    owner: "{{ fabric_user_name }}"
+  become_user: root
+  when: msp.client is defined

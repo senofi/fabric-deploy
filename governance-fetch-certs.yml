@@ -1,0 +1,6 @@
+---
+- hosts: "{{ ca_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  roles:
+    - governance-fetch-certs

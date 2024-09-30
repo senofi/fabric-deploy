@@ -1,0 +1,14 @@
+---
+- name: Debug
+  debug:
+    msg: "################## Register for MSPs begin  ##################"
+
+- name: Regsiter the users of all MSPs
+  include_role:
+    name: register-params
+  vars:
+    single_var: "notsinglemsp"
+
+- name: Debug
+  debug:
+    msg: "################## Register for MSPs end  ##################"

@@ -1,0 +1,19 @@
+# Destroy a peer
+
+- hosts: "{{ ca_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  roles: 
+    - revoke-identity
+
+- hosts: "{{ manager_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  roles: 
+    - peer-remove-service
+
+- hosts: "{{ node_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  roles: 
+    - peer-remove-volume

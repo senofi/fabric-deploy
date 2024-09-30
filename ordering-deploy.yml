@@ -1,0 +1,12 @@
+---
+# Bootstrap the ordering service. Creates new Root CA/TLS CA, generates the genesis block and starts the ordering service nodes.
+# Copies the participating MSP CA /TLS CA certs to the remote machine where the ordering service will be running
+
+- hosts: "{{ manager_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  roles:
+    - enroll-ordering
+    - genesis
+    - stacks
+    - start

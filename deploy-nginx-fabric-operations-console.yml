@@ -1,0 +1,14 @@
+---
+# Deploy HLF operations console
+- hosts: "{{ target_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  tasks:
+    - set_fact:
+        deploy_fabric_console_nginx: true
+    - include_role:
+        name: config-nginx-fabric-ops-console
+    - include_role:
+        name: stacks
+    - include_role:
+        name: start

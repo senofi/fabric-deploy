@@ -1,0 +1,60 @@
+---
+########################## Boot temporary root CA to issue TLS CA servers certificates
+# The goal is to start a temporary CA that will issue TLS certificates for the other CA servers
+# The temporary CA is destroyed after the TLS certificates are issued
+- name: Debug
+  debug:
+    msg: "################## TLS Temporary CA Bootstrap ##################"
+
+
+
+#Start the temporary CA server (generate the stack files, start the stack, enroll the admin user to be used to register users in the next steps)
+# To be executed on Manager machine
+- include_tasks: boot-single.yml
+  loop: "{{ msps }}"
+  loop_control:
+    loop_var: msp_itm
+  when: msp_itm.tls_ca is defined and msp_itm.tls_ca == "yes"
+
+
+## Begin register and enroll CAs client/server TLS certs - create the root CA TLS PKI
+# To be executed on the CA machine
+- name: Debug
+  debug:
+    msg: "###### Register and enroll server and client user for TLS certs for TLS enablement on the MSP CAs"
+
+- name: Register the users of the msp
+  include_role:
+    name: register-msp-identities
+  vars:
+    register_msp: "{{ msp_itm }}"
+  loop: "{{ msps }}"
+  loop_control:
+    loop_var: msp_itm
+  when: msp_itm.tls_ca is defined and msp_itm.tls_ca == "yes" and (actionTag is undefined or actionTag == "registerEnroll")
+
+- name: Enroll the users of the msp
+  include_role:
+    name: enroll-msp-identities
+  vars:
+    enrollment_msp: "{{ msp_itm }}"
+  loop: "{{ msps }}"
+  loop_control:
+    loop_var: msp_itm
+  when: msp_itm.tls_ca is defined and msp_itm.tls_ca == "yes" and (actionTag is undefined or actionTag == "registerEnroll")
+###### End register and enroll CAs client/server TLS certs
+
+###Stop the stack of the temporary CA server
+# To be executed on Manager machine
+- include_tasks: ca-root-stack-stop.yml
+  vars:
+    msp_var: "{{ msp_itm }}"
+  loop: "{{ msps }}"
+  loop_control:
+    loop_var: msp_itm
+  when: msp_itm.tls_ca is defined and msp_itm.tls_ca == "yes" and (actionTag is undefined or actionTag == "stop")
+
+########################## End Boot TLS CA
+- name: Debug
+  debug:
+    msg: "################## TLS Temporary CA Bootstrap  Finish  ##################"
