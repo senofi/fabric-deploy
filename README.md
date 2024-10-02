@@ -81,6 +81,7 @@ ansible-playbook setup-fabric-tools-folders.yml --extra-vars "@vars/config.yml"
 Note: 
 Creates dedicated folders to install required libraries, configure the network and store the related config files and crypto materials.
 The path to the root working folder is configured in the supplied config.yml. It can point to a network file share if multiple machines are used.
+If using multiple machines, run this playbook on each one of them. You may change the remote machine by adjusting the target_machine variable.
 
 
 #### Install HLF Tools
@@ -92,7 +93,9 @@ ansible-playbook install-fabric-tools.yml --extra-vars "@vars/config.yml"
 ```
 
 Note: 
-Installs HLF tools from HLF repository
+Installs HLF tools from HLF repository.
+If using multiple machines, run this playbook on each one of them. You may change the remote machine by adjusting the target_machine variable.
+
 
 #### Deploy Fabric Ops Console
 
@@ -111,6 +114,9 @@ Command:
 ```
 ansible-playbook deploy-msp-ca.yml --extra-vars "@vars/config.yml"
 ```
+Note:
+This playbook will deploy two CA servers to issue the certificates and TLS certificates of the HLF MSP. Each MSP has its own set of CA servers.
+Run this playbook on the machine where the CA should be deployed. You may change the remote machine by adjusting the target_machine variable.
 
 #### Register and enroll the MSP Peer with Fabric CA and Fabric TLS CA
 
@@ -119,6 +125,11 @@ Command:
 ```
 ansible-playbook register-enroll-msp-peer.yml  --extra-vars "@vars/config.yml"
 ```
+Note:
+This playbook will register and enroll the MSP peer identity with the MSP CA servers. 
+Run this playbook on the machine where the peer will be running. If the peer machine is different from the CA machine you should make sure to share the certs required to connect to the CA servers.
+You may change the remote machine by adjusting the target_machine variable.
+
 
 #### Deploy MSP Peer
 
@@ -127,13 +138,17 @@ Command:
 ```
 ansible-playbook deploy-msp-peer.yml --extra-vars "@vars/config.yml"
 ```
+This playbook will deploy a HLF peer in docker container. Run this playbook on the machine where the peer will be running. 
+You may change the remote machine by adjusting the target_machine variable.
 
 #### Export MSP, CA, Peer config and users
+
+Run the below playbooks on the machine where the CA servers are running.
 
 Playbook: export-console-msp-admin-users.yml
 Command: 
 ```
-ansible-playbook export-console-admin-users.yml --extra-vars "@vars/config.yml"
+ansible-playbook export-console-msp-admin-users.yml --extra-vars "@vars/config.yml"
 ```
 Note: 
 Generates json files on the remote machine that contains the crypto of the admin users of the Fabric peer and Fabric CA / TLS CA servers..

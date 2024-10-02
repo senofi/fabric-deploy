@@ -33,9 +33,16 @@
     hc_host: "{{ hc_node.peer }}"
   when: hc_node.peer is defined
 
-- name: Waiting for the node to start on network {{ hc_network }}  and endpoint {{hc_host}}:{{hc_port}}
+- set_fact:
+    protocol: "https"
+
+- set_fact:
+    protocol: "http"
+  when: hc_msp.tls_ca is defined and msp.tls_ca == "yes"
+
+- name: Waiting for the node to start on network {{ hc_network }}  and url {{protocol}}://{{hc_host}}:{{hc_port}}/healthz
   shell: >
-    docker run --network={{ hc_network }} --rm --name curl pstauffer/curl:latest curl https://{{hc_host}}:{{hc_port}}/healthz -k
+    docker run --network={{ hc_network }} --rm --name curl pstauffer/curl:latest curl {{protocol}}://{{hc_host}}:{{hc_port}}/healthz -k
   register: hc_json_response
   ignore_errors: True
   until:  hc_json_response.stdout.find('{') != -1 and (hc_json_response.stdout | from_json).status is defined and (hc_json_response.stdout | from_json).status == "OK"

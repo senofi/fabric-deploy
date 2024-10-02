@@ -19,15 +19,15 @@ services:
       - FABRIC_CA_SERVER_SIGNING_DEFAULT_EXPIRY=43800h
       - FABRIC_CA_SERVER_SIGNING_PROFILES_TLS_EXPIRY=43800h
       - FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS=:8443
-      - FABRIC_CA_SERVER_OPERATIONS_TLS_ENABLED=true
-      - FABRIC_CA_SERVER_OPERATIONS_TLS_CERTFILE=/etc/hyperledger/fabric-ca-tls-certs/cert.crt
-      - FABRIC_CA_SERVER_OPERATIONS_TLS_KEYFILE=/etc/hyperledger/fabric-ca-tls-certs/key.key
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server-[[ ca.ca ]]
       - FABRIC_CA_SERVER_CA_NAME=[[ ca.ca ]]{% if ca.cert is defined and ca.key is defined %}
       - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-certs/[[ ca.cert ]]
       - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-certs/[[ ca.key ]]{% endif %}
       - FABRIC_CA_SERVER_CSR_CN=[[ ca.ca ]].[[ msp.domain ]]{% if msp.tls_ca is undefined or msp.tls_ca != "yes" %}
       - FABRIC_CA_SERVER_METRICS_PROVIDER=prometheus
+      - FABRIC_CA_SERVER_OPERATIONS_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_OPERATIONS_TLS_CERTFILE=/etc/hyperledger/fabric-ca-tls-certs/cert.crt
+      - FABRIC_CA_SERVER_OPERATIONS_TLS_KEYFILE=/etc/hyperledger/fabric-ca-tls-certs/key.key
       - FABRIC_CA_SERVER_TLS_ENABLED=true
       - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-tls-certs/cert.crt
       - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-tls-certs/key.key
