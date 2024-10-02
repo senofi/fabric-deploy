@@ -4,7 +4,7 @@ Deploy Hyperledger Fabric Ansible playbooks
 
 ### What is this repository for? ###
 
-The repository contains ansible playbooks that automate the deployment of Fabric Operations Console, Hyperledger CA and HLF peer nodes on a prepared, configured and provisioned infrastructure on Linux machines with Docker containers.
+The repository contains ansible playbooks that automate the deployment of Fabric Operations Console, Hyperledger CA and HLF peer nodes on a prepared, configured and provisioned infrastructure on Linux machines in Docker containers.
 
 The networking and infrastructure resource provisioning is environment/cloud specific and should be desinged and implemented upfront.
 
@@ -55,70 +55,77 @@ You may use vars/config.yml as a template. You may go through the file comments 
 
 The target_machine variable value must be configured and should be the name of the remote machine as defined in the ansible hosts file.
 
+Execute the following ansible playbooks to deploy the HLF components
 
+### Ansible Playbook ###
 #### Setup wokring HLF Folders
-
+```
 Playbook: setup-fabric-tools-folders.yml
 Command: ansible-playbook setup-fabric-tools-folders.yml --extra-vars "@vars/config.yml"
 Note: 
 Creates dedicated folders to install required libraries, configure the network and store the related config files and crypto materials.
 The path to the root wokring folder is configured in the supplied config.yml. It can point to a network file share if multiple machines are used.
-
+```
 
 #### Install HLF Tools
-
+```
 Playbook: install-fabric-tools.yml
 Command: ansible-playbook install-fabric-tools.yml --extra-vars "@vars/config.yml"
 Note: 
 Installs HLF tools from HLF repository
-
+```
 #### Deploy Fabric Ops Console
-
+```
 Playbook: deploy-fabric-operations-console.yml
 Command: ansible-playbook deploy-fabric-operations-console.yml  -e "target_machine=node" --extra-vars "@vars/config.yml"
 Note: 
 Configures and deploys fabric ops console. The console will use the configured TLS certs. If no TLS certs are provided the playbook will generate and use a self signed TLS certs.
-
+```
 #### Deploy MSP CA and TLS CA
-
+```
 Playbook: deploy-msp-ca.yml
 Command: ansible-playbook deploy-msp-ca.yml --extra-vars "@vars/config.yml"
-
+```
 
 #### Register and enroll the MSP Peer with Fabric CA and Fabric TLS CA
-
+```
 Playbook: register-enroll-msp-peer.yml
 Command: ansible-playbook register-enroll-msp-peer.yml  -e "target_machine=ca" --extra-vars "@vars/config.yml"
-
+```
 
 #### Deploy MSP Peer
-
+```
 Playbook: deploy-msp-peer.yml
 Command: ansible-playbook deploy-msp-peer.yml  -e "target_machine=ca" --extra-vars "@vars/config.yml"
-
+```
 
 #### Export MSP, CA, Peer config and users
-
+```
 Playbook: export-console-msp-admin-users.yml
 Command: ansible-playbook export-console-admin-users.yml  -e "target_machine=ca" --extra-vars "@vars/config.yml"
 Note: 
 Generates json files on the remote machine that contains the crypto of the admin users of the Fabric peer and Fabric CA / TLS CA servers..
 The files can be downloaded locally and imported manually inside the fabric operations console wallet.
 The paths to the generated files on the remote machine can be found inside the playbook log.
+```
 
+```
 Playbook: export-console-msp-config.yml
 Command: ansible-playbook export-console-msp-config.yml  -e "target_machine=ca" --extra-vars "@vars/config.yml"
 Note: 
 Generates json files on the remote machine that contains the definition and connection details of the Fabric CA, Fabric TLS CA and MSP.
 The files can be downloaded locally and imported manually inside the fabric operations console (import organization and import CA nodes).
 The paths to the generated files on the remote machine can be found inside the playbook log.
+```
 
+```
 Playbook: export-console-peer-config.yml
 Command: ansible-playbook export-console-peer-config.yml  -e "target_machine=ca" --extra-vars "@vars/config.yml"
 Note:
 Generates a json file on the remote machine that contains the definition and connection details of the Fabric peer.
 The file can be downloaded locally and imported manually inside the fabric operations console (import peer node).
 The path to the generated file on the remote machine can be found inside the playbook log.
+```
 
 #### Import MSP, CA, Peer, users to Fabric Ops Console
 
