@@ -1,13 +1,26 @@
 
 ###################### 
 
+### the ansible remote host name as dfined in ansible hosts
+target_machine: ca
+
+fabric_user_name: "fabric"
+
+root_working_folder: "/srv/fabric"
+fabric_version: 2.5.8
+
 env_id: test
 
 #### Fabric Operations Console
 ### Set the domain name of the Fabric Operations console.
 ### The host name is usually a subdomain of your entity main domain ( e.g. https://fabric-operations-console.hlf.acme.com  )
-fabric_console_domain_name: ec2-52-207-247-62.compute-1.amazonaws.com
-fabric_console_port: 443
+fabric_console_domain_name: fabric-console.hlf.acme.com
+#The port opened on the machine and mapped to the fabric operation console container port
+fabric_console_port: 4443
+
+#The external endpoint of the fabric operation console web interface
+fabric_console_host_url: "https://{{fabric-console.hlf.acme.com}}"
+
 ######################
 
 #### MSP name and domain. Do not use special characters, use letters.
@@ -16,59 +29,59 @@ msp_name: acme
 ######################
 
 #### MSP Certificate Authority Configuration ####
-ca_endpoint_host: ec2-54-161-94-183.compute-1.amazonaws.com
-caTls_endpoint_host: "{{ca_endpoint_host}}"
+ca_endpoint_host: fabric-ca.hlf.acme.com
+caTls_endpoint_host: fabric-tls-ca.hlf.acme.com
+ca_ops_endpoint_host: fabric-ca-ops.hlf.acme.com
+caTls_ops_endpoint_host: fabric-tls-ca-ops.hlf.acme.com
 
 ca_name: "{{msp_name}}ca"
 caTls_name: "{{msp_name}}tlsca"
 
 ### CA API and CA operations ports, those ports are opened and mapped to the CA container ports
-ca_port: 8012
-caTls_port: 8011
+ca_port: 5443
+caTls_port: 6443
 
-ca_ops_port: 9012
-caTls_ops_port: 9011
+ca_ops_port: 7443
+caTls_ops_port: 8443
 
-### Set the external CA API and Operations endpoint URLs. If network load balancing is used those URL may refer to different DNS names on port 443.
-### The host name is usually a subdomain of your entity main domain ( e.g. https://ca.hlf.acme.com  https://ca-operations.hlf.acme.com , etc. )
-caTls_api_url: "https://{{caTls_endpoint_host}}:{{caTls_port}}"
-
-ca_ops_url: "https://{{ca_endpoint_host}}:{{ca_ops_port}}"
-caTls_ops_url: "https://{{caTls_endpoint_host}}:{{caTls_ops_port}}"
 ######################
 
 #### Peer Configuration ####
-peer_name: peer1
+peer_name: acmepeer1
 
-### CA API and CA operations ports, those ports are opened and mapped to the CA container ports
-peer_port: 7020
-peer_ops_port: 9443
-webproxy_tls_port: 5443
+### Peer API and operations ports, those ports are opened and mapped to the peer container ports
+peer_port: 9443
+peer_ops_port: 10443
+webproxy_tls_port: 11443
 
 ### Set the external Peer API endpoint and port. If network load balancing is used the endpoint may be a dedicated host and SSL 443 port.
 ### The host name is usually a subdomain of your entity main domain ( e.g. https://peer1.hlf.acme.com )
-peer_endpoint_port: 7020
-peer_endpoint_host_name: ec2-54-161-94-183.compute-1.amazonaws.com
+peer_endpoint_port: 443
+peer_endpoint_host_name: acmepeer1.hlf.acme.com
 
 ### Set the external Peer Operations endpoint URL. If network load balancing is used the URL may refer to a dedicated host on port 443.
 ### The host name is usually a subdomain of your entity main domain ( e.g. https://peer1-operations.hlf.acme.com )
-peer_ops_endpoint_url: "https://{{peer_endpoint_host}}:{{peer_ops_port}}"
+peer_ops_endpoint_url: "https://acmepeer1-ops.hlf.acme.com"
 
 ### Set the external Peer GRPC Web proxy endpoint, port and URL. If network load balancing is used the URL may refer to a dedicated host on port 443.
 ### The host name is usually a subdomain of your entity main domain ( e.g. https://peer1-grpcs-web.hlf.acme.com )
-webproxy_endpoint: "{{peer_endpoint_host_name}}:{{webproxy_tls_port}}"
+webproxy_endpoint: acmepeer1-web-proxy.hlf.acme.com
 webproxy_endpoint_url: "https://{{webproxy_endpoint}}"
+
+### If TLS certs are already available , uncomment and configure as base64 encoded 
+# fabric_console_tls_key_b64: 
+# fabric_console_tls_cert_b64: 
+
 
 ######################
 
+
+###################### Fine Grain Configuration ######################
 
 
 ###################### FABRIC OPS CONSOLE BEGIN ################################
 
-fabric_user_name: "fabric"
 
-root_working_folder: "/srv/fabric"
-fabric_version: 2.5.8
 config_folder: "{{root_working_folder}}/{{env_id}}/config"
 fabric_console_config_folder_path: "{{ config_folder }}/fabric_console"
 fabric_console_stack: console
@@ -76,23 +89,28 @@ fabric_console_subnet_cidr: 10.2.7.0/24
 fabric_console_image: ghcr.io/hyperledger-labs/fabric-console:latest
 fabric_console_fab_img_tag: "{{fabric_version}}"
 
-fabric_console_host_url: https://{{fabric_console_domain_name}}:{{fabric_console_port}}
 fabric_console_network: console
 fabric_console_tls_city: LA
-# fabric_console_tls_key_b64: 
-# fabric_console_tls_cert_b64: 
+
 
 fabric_console_nginx_stack: console_nginx
 fabric_console_nginx_image: nginx
 fabric_console_nginx_port: 443
-# fabric_console_nginx_tls_key_b64: 
-# fabric_console_nginx_tls_cert_b64: 
+
 
 ###################### FABRIC OPS CONSOLE END ################################
 
 
 
 ###################### FABRIC MSP CA BEGIN ################################
+
+### Set the external CA API and Operations endpoint URLs. If network load balancing is used those URL may refer to different DNS names on port 443.
+### The host name is usually a subdomain of your entity main domain ( e.g. https://ca.hlf.acme.com  https://ca-operations.hlf.acme.com , etc. )
+caTls_api_url: "https://{{caTls_endpoint_host}}:{{caTls_port}}"
+ca_api_url: "https://{{ca_endpoint_host}}:{{ca_port}}"
+
+ca_ops_url: "https://{{ca_ops_endpoint_host}}:{{ca_ops_port}}"
+caTls_ops_url: "https://{{caTls_ops_endpoint_host}}:{{caTls_ops_port}}"
 
 msp_ca_admin_user: "{{msp_name}}caadminb"
 msp_peer_admin_user: "{{msp_name}}peerAdmin"
