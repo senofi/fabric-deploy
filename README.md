@@ -195,6 +195,11 @@ The exact path to the generated file on the remote machine can be found inside t
 
 The generated json files from the previous step can be downloaded locally from the remote machine. Those json files can be then imported inside the fabric operation console so that the deployed Fabric assets can be operated.
 
+You may use the scp command to download all export files locally.
+```
+scp -rp {{ca_machine}}:/srv/fabric/test/data/fabric-console/export/ .
+```
+
 The following list represents the imports in fabric operation console
 - Wallet admin identities import
     - Wallet -> Add identity -> Upload JSON -> Add identity
