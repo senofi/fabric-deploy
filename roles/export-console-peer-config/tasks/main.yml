@@ -56,4 +56,4 @@
 
 - name: Backup the config file
   shell: >
-    cp -r {{console_export_folder}}/fabric_console_peer_{{msp_name}}_{{ peer_name }}.json {{console_export_folder}}/fabric_console_peer_{{ peer_name }}_{{ansible_date_time.iso8601_basic_short}}.json
+    cp -r {{console_export_folder}}/fabric_console_peer_{{msp_name}}_{{ peer_name }}.json {{console_export_folder}}/fabric_console_peer_{{msp_name}}_{{ peer_name }}_{{ansible_date_time.iso8601_basic_short}}.json

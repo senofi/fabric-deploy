@@ -11,6 +11,7 @@
   become: yes
 
 - block:
+# Export peer admin identity to a json file
     - name: Load cert in Base64 from the file system
       slurp:
         src: "{{ local_pki_folder }}/{{ msp_domain }}/users/{{user_name}}/msp/signcerts/cert.pem"
@@ -37,6 +38,7 @@
   when: ca_admin is not defined or ca_admin != true
 
 - block:
+# Export CA admin identity to a json file
     - name: Load cert in Base64 from the file system
       slurp:
         src: "{{ local_pki_folder }}/{{ msp_domain }}/fabric-ca/{{user_ca_name}}/clients/{{user_name}}/msp/signcerts/cert.pem"
@@ -44,7 +46,7 @@
 
     - set_fact:
         user_cert: "{{ loaded_cert_file.content }}"
-    - name: Recursively find /tmp files older than 2 days
+    - name: Find the key file name
       find:
         paths: "{{ local_pki_folder }}/{{ msp_domain }}/fabric-ca/{{user_ca_name}}/clients/{{user_name}}/msp/keystore"
       register: result

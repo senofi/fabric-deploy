@@ -56,6 +56,8 @@
   shell: >
     cp -r {{console_export_folder_msp}}/fabric_console_msp_{{ msp_name}}.json {{console_export_folder_msp}}/fabric_console_msp_{{ msp_name }}_{{ansible_date_time.iso8601_basic_short}}.json
 
+######### Export Fabric CA profile
+
 - set_fact:
     ca_json_destination: "{{console_export_folder_ca}}/fabric_console_ca_{{ msp_name }}.json"
 
@@ -75,6 +77,10 @@
     trim_blocks: no
     variable_start_string: "[["
     variable_end_string: "]]"
+
+- name: Backup the TLS CA config file
+  shell: >
+    cp -r {{ca_json_destination}} {{console_export_folder_ca}}/fabric_console_ca_{{ msp_name }}_{{ansible_date_time.iso8601_basic_short}}.json
 
 ######### Export TLS Fabric CA profile
 - set_fact:
@@ -100,6 +106,6 @@
     variable_start_string: "[["
     variable_end_string: "]]"
 
-- name: Backup the CA config file
+- name: Backup the TLS CA config file
   shell: >
-    cp -r {{ca_json_destination}} {{console_export_folder_ca}}/fabric_console_ca_{{ msp_name }}_{{ansible_date_time.iso8601_basic_short}}.json
+    cp -r {{ca_json_destination}} {{console_export_folder_ca}}/fabric_console_tlsca_{{ msp_name }}_{{ansible_date_time.iso8601_basic_short}}.json
