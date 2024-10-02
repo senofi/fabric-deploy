@@ -25,14 +25,27 @@ It is also possible to route the inbound traffic directly to the machine (withou
 The infrastructure should be prepared, configured and provisioned upfront before deploying the HLF nodes. That includes the preparation/configuration of the DNS names of the HLF endpoints, provision of the machines, provision of the load balancers and their respective configurations for inbound traffic rules, network shares, etc.
 
 ### Prerequisites ###
-1. Linux instance(s) (The playbooks are tested AWS image ubuntu-noble-24.04-amd64-server-20240801) where the HLF containers will be deployed.
+1. Linux instance(s) where the HLF containers will be deployed. If more than one machines are used, repeat the step on each of the provisioned machines.
     - SSH access to those instances is required from the environment where the ansible playbooks will be run (local machine or AWX)
-    - Create a dedicated Linux group and user (default name "fabric") for use by the ansible playbooks. You may do it manually or run the playbook create-users.yml.
+    - Create a dedicated Linux group and user (default user/group name "fabric") for use by the ansible playbooks. You may do it manually or run the playbook create-users.yml.
+    ```
+    sudo useradd fabric
+    ```
+     
     - Software packages:
         - Docker - https://docs.docker.com/engine/install/ubuntu/ , make sure to follow the post install steps: https://docs.docker.com/engine/install/linux-postinstall/
-        - ACL library - e.g. "sudo apt-get install acl"
-    - Configure docker group to add the newly created "fabric" user  -e.g. sudo usermod -aG docker fabric
-    - Initialize docker swarm on the provisioned instances by running the command: docker swarm init
+        - ACL library - e.g. 
+        ```
+        sudo apt-get install acl"
+        ```
+    - Configure docker group to add the newly created "fabric" user  -e.g. 
+    ```
+    sudo usermod -aG docker fabric
+    ```
+    - Initialize docker swarm on the provisioned instances by running the command: 
+    ```
+    sudo docker swarm init
+    ```
     - A network file folder may be created and attached to the machine. The folder can serve as a common shared location of the fabric configurations and crypto material. This is useful when multiple machines are used to deploy additional fabric peers.
 
 2. DNS names for HLF endpoints and Load Balancer(s) to handle the inbound traffic to the HLF nodes
