@@ -44,6 +44,14 @@ caTls_port: 6443
 ca_ops_port: 7443
 caTls_ops_port: 8443
 
+### Set the external CA API and Operations endpoint URLs. If network load balancing is used those URL may refer to different DNS names on port 443.
+### The host name is usually a subdomain of your entity main domain ( e.g. https://ca.hlf.acme.com  https://ca-operations.hlf.acme.com , etc. )
+caTls_api_url: "https://{{caTls_endpoint_host}}:443"
+ca_api_url: "https://{{ca_endpoint_host}}:443"
+
+ca_ops_url: "https://{{ca_ops_endpoint_host}}:443"
+caTls_ops_url: "https://{{caTls_ops_endpoint_host}}:443"
+
 ######################
 
 #### Peer Configuration ####
@@ -66,7 +74,7 @@ peer_ops_endpoint_url: "https://acmepeer1-ops.hlf.acme.com"
 ### Set the external Peer GRPC Web proxy endpoint, port and URL. If network load balancing is used the URL may refer to a dedicated host on port 443.
 ### The host name is usually a subdomain of your entity main domain ( e.g. https://peer1-grpcs-web.hlf.acme.com )
 webproxy_endpoint: acmepeer1-web-proxy.hlf.acme.com
-webproxy_endpoint_url: "https://{{webproxy_endpoint}}"
+webproxy_endpoint_url: "https://{{webproxy_endpoint}}:443"
 
 ### If TLS certs are already available , uncomment and configure as base64 encoded 
 # fabric_console_tls_key_b64: 
@@ -103,14 +111,6 @@ fabric_console_nginx_port: 443
 
 
 ###################### FABRIC MSP CA BEGIN ################################
-
-### Set the external CA API and Operations endpoint URLs. If network load balancing is used those URL may refer to different DNS names on port 443.
-### The host name is usually a subdomain of your entity main domain ( e.g. https://ca.hlf.acme.com  https://ca-operations.hlf.acme.com , etc. )
-caTls_api_url: "https://{{caTls_endpoint_host}}:{{caTls_port}}"
-ca_api_url: "https://{{ca_endpoint_host}}:{{ca_port}}"
-
-ca_ops_url: "https://{{ca_ops_endpoint_host}}:{{ca_ops_port}}"
-caTls_ops_url: "https://{{caTls_ops_endpoint_host}}:{{caTls_ops_port}}"
 
 msp_ca_admin_user: "{{msp_name}}caadminb"
 msp_peer_admin_user: "{{msp_name}}peerAdmin"
