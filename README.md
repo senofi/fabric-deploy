@@ -126,9 +126,9 @@ Note:
 Generates json files on the remote machine that contains the crypto of the admin users of the Fabric peer and Fabric CA / TLS CA servers..
 The files can be downloaded locally and imported manually inside the fabric operations console wallet.
 The generated json file are:
-- Peer admin: {{ data_folder }}/fabric-console/export/users/{{ msp_name }}/fabric_user_{{msp_name}}_{{ msp_peer_admin_user }}.json
-- CA admin: {{ data_folder }}/fabric-console/export/users/{{ msp_name }}/fabric_user_{{msp_name}}_{{ca_name}}_{{ msp_ca_admin_user }}.json
-- TLS CA admin: {{ data_folder }}/fabric-console/export/users/{{ msp_name }}/fabric_user_{{msp_name}}_{{caTls_name}}_{{ msp_tls_ca_admin_user }}.json
+- Peer admin: {{ data_folder }}/fabric-console/export/users/{{ msp_name }}/fabric_user_{{ msp_name }}_{{ msp_peer_admin_user }}.json
+- CA admin: {{ data_folder }}/fabric-console/export/users/{{ msp_name }}/fabric_user_{{ msp_name }}_{{ ca_name }}_{{ msp_ca_admin_user }}.json
+- TLS CA admin: {{ data_folder }}/fabric-console/export/users/{{ msp_name }}/fabric_user_{{ msp_name }}_{{ caTls_name }}_{{ msp_tls_ca_admin_user }}.json
 
 The paths to the generated files on the remote machine can be found inside the playbook log.
 
@@ -158,7 +158,7 @@ Generates a json file on the remote machine that contains the definition and con
 The file can be downloaded locally and imported manually inside the fabric operations console (import peer node).
 
 The generated json file is:
-- Per definition: {{ data_folder }}/fabric-console/export/peer/fabric_console_peer_{{msp_name}}_{{ peer_name }}.json
+- Per definition: {{ data_folder }}/fabric-console/export/peer/fabric_console_peer_{{ msp_name }}_{{ peer_name }}.json
 
 The exact path to the generated file on the remote machine can be found inside the playbook log.
 
@@ -171,12 +171,12 @@ The following list represents the imports in fabric operation console
 - Wallet admin identities import
     - Wallet -> Add identity -> Upload JSON -> Add identity
     - Repeat the above step to import the admin identities stored in the following files
-        - Peer admin json file: fabric_user_{{msp_name}}_{{ msp_peer_admin_user }}.json
-        - Certificate Authority admin json file: fabric_user_{{msp_name}}_{{ca_name}}_{{ msp_ca_admin_user }}.json
-        - TLS Certificate Authority admin json file: fabric_user_{{msp_name}}_{{caTls_name}}_{{ msp_tls_ca_admin_user }}.json
+        - Peer admin json file: fabric_user_{{ msp_name }}_{{ msp_peer_admin_user }}.json
+        - Certificate Authority admin json file: fabric_user_{{ msp_name }}_{{ ca_name }}_{{ msp_ca_admin_user }}.json
+        - TLS Certificate Authority admin json file: fabric_user_{{ msp_name }}_{{ caTls_name }}_{{ msp_tls_ca_admin_user }}.json
 - Peer Node import
     - Nodes -> Import peer -> Add file -> Add peer
-    - Choose the peer config json file: fabric_console_peer_{{msp_name}}_{{ peer_name }}.json
+    - Choose the peer config json file: fabric_console_peer_{{ msp_name }}_{{ peer_name }}.json
     - Nodes -> Peer ( select the imported peer ) -> Associate Identity
     - Choose the peer admin identity from the wallet
 - CA Nodes import (CA and TLS CA)
