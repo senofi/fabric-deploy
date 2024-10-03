@@ -1,0 +1,25 @@
+---
+- hosts: "{{ target_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  tasks:
+    - set_fact:
+        user_name: "{{msp_peer_admin_user}}"
+    - include_role:
+        name: export-console-msp-user
+    - set_fact:
+        user_name: "{{msp_ca_admin_user}}"
+    - set_fact:
+        ca_admin: true
+    - set_fact:
+        user_ca_name: "{{ca_name}}"
+    - include_role:
+        name: export-console-msp-user
+    - set_fact:
+        user_name: "{{msp_tls_ca_admin_user}}"
+    - set_fact:
+        ca_admin: true
+    - set_fact:
+        user_ca_name: "{{caTls_name}}"
+    - include_role:
+        name: export-console-msp-user

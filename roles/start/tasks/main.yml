@@ -1,0 +1,40 @@
+---
+
+- name: Debug
+  debug:
+    msg: "Deploy msp stack  {{ item }} file {{ config_folder }}/stack_{{ item.stack }}.yaml"
+  loop: "{{ peer_msps }}"
+  when: deploy_msps is defined and deploy_msps == true and peer_msps is defined and item.stack is defined
+
+- name: Start swarm stacks
+  shell: >
+    bash -l -c "
+      export STACK={{ msp_start_var.stack }}
+      docker stack deploy -c {{ config_folder }}/stack_{{ msp_start_var.stack }}.yaml {{ msp_start_var.stack }} "
+  loop: "{{ peer_msps }}"
+  loop_control:
+    loop_var: msp_start_var
+  when: deploy_msps is defined and deploy_msps == true and peer_msps is defined and msp_start_var.stack is defined
+
+- include_tasks: wait_till_nodes_start.yml
+  vars:
+    start_nodes: "{{ msp_start_var.peers }}"
+    start_msp: "{{ msp_start_var }}"
+  loop: "{{ peer_msps }}"
+  loop_control:
+    loop_var: msp_start_var
+  when: deploy_msps is defined and deploy_msps == true and peer_msps is defined and msp_start_var.stack is defined
+
+- name: Start docker stack of fabric operations console
+  shell: >
+    bash -l -c "
+      export STACK={{ fabric_console_stack }}
+      docker stack deploy -c {{fabric_console_config_folder_path}}/stack_fabric_console{{ fabric_console_stack }}.yaml {{ fabric_console_stack }} "
+  when: deploy_fabric_console is defined and deploy_fabric_console == true and fabric_console_stack is defined
+
+- name: Start docker stack of nginx fabric operations console
+  shell: >
+    bash -l -c "
+      export STACK={{ fabric_console_nginx_stack }}
+      docker stack deploy -c {{fabric_console_config_folder_path}}/stack_nginx_fabric_console{{ fabric_console_nginx_stack }}.yaml {{ fabric_console_nginx_stack }} "
+  when: deploy_fabric_console_nginx is defined and deploy_fabric_console_nginx == true and fabric_console_nginx_stack is defined

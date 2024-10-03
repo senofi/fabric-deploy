@@ -1,0 +1,25 @@
+version: "3.6"
+services:
+  prometheus: 
+    container_name: prometheus
+    image: prom/prometheus 
+    command:
+      - --config.file=/etc/prometheus/prometheus.yaml
+    secrets:
+      - source: prometheus
+        target: /etc/prometheus/prometheus.yaml
+    networks: 
+      - [[ metric_deploy_msp.network ]]
+
+secrets:
+  prometheus:
+      file: [[ config_folder ]]/[[ metric_deploy_msp.msp ]]/metric_config.yaml
+
+networks:
+  [[ metric_deploy_msp.network ]]:
+    driver: overlay
+    attachable: true
+    ipam:
+      driver: default
+      config:
+        - subnet: [[ metric_deploy_msp.subnet_cidr ]]

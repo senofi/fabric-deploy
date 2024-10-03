@@ -1,0 +1,63 @@
+---
+
+- set_fact:
+    f_path: "{{ local_pki_folder }}/{{ vault_msp.domain }}/fabric-ca/{{ vault_ca.ca }}/clients/{{ vault_user.user }}" 
+
+- name: Find PKI file path
+  find:
+    paths: "{{ f_path }}/msp/keystore"
+  register: file_found
+
+- set_fact:
+    key_path: "{{ file_found.files[0].path }}"
+
+- name: Find PKI file path
+  find:
+    paths: "{{ f_path }}/msp/signcerts"
+  register: file_found
+
+- set_fact:
+    cert_path: "{{ file_found.files[0].path }}"
+
+- name: Find PKI file path
+  find:
+    paths: "{{ f_path }}/msp/cacerts"
+  register: file_found
+
+- set_fact:
+    ca_cert_path: "{{ file_found.files[0].path }}"
+
+- set_fact:
+    ca_type: "msp"
+  when: vault_ca.tls != true
+
+- set_fact:
+    ca_type: "tls"
+  when: vault_ca.tls == true
+
+- set_fact:
+    vault_identity: "{ \"msp\": \"{{ vault_msp.msp }}\", \"id\": \"{{ vault_user.user }}\", \"secret\": { \"path\":\"{{ key_path }}\",\"type\":\"key\",\"ca\":\"{{ ca_type }}\" } }"
+
+- name: Push the identity key to vault {{vault_identity}}
+  include_role:
+    name: upload-secret-vault
+  vars:
+    vault_create_identity: "{{ vault_identity | from_json }}"
+
+- set_fact:
+    vault_identity: "{\"msp\": \"{{ vault_msp.msp }}\", \"id\": \"{{ vault_user.user }}\", \"secret\": { \"path\":\"{{ cert_path }}\",\"type\":\"cert\",\"ca\":\"{{ ca_type }}\" } }"
+
+- name: Push the identity cert to vault {{vault_identity}}
+  include_role:
+    name: upload-secret-vault
+  vars:
+    vault_create_identity: "{{ vault_identity | from_json }}"
+
+- set_fact:
+    vault_identity: "{ \"msp\": \"{{ vault_msp.msp }}\", \"id\": \"{{ vault_user.user }}\", \"secret\": { \"path\":\"{{ ca_cert_path }}\",\"type\":\"ca\",\"ca\":\"{{ ca_type }}\" } }"
+
+- name: Push the ca cert to vault {{vault_identity}}
+  include_role:
+    name: upload-secret-vault
+  vars:
+    vault_create_identity: "{{ vault_identity | from_json }}"

@@ -1,0 +1,11 @@
+# Call to health check enpoint for each node
+
+- name: Waiting for the nodes to start
+  include_role:
+    name: start-health-check
+  vars:
+    hc_node: "{{ start_node }}"
+    hc_msp: "{{ start_msp }}"
+  loop: "{{ start_nodes }}"
+  loop_control:
+    loop_var: start_node

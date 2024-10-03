@@ -1,0 +1,18 @@
+---
+- set_fact:
+    msp: "{{ msp_var }}"
+
+- name: Clear the source of the uploaded certs
+  file:
+    state: absent
+    path: "{{ pki_local_folder }}/{{ msp.domain }}/msp-{{ msp.msp }}-{{ msp.domain }}-msp-certs.tar"
+  sudo: no
+  delegate_to: localhost
+
+- name: Clear the source of the uploaded certs
+  file:
+    state: absent
+    path: "{{ pki_local_folder }}/{{ msp.domain }}/msp-{{ msp.msp }}-{{ msp.domain }}/users/"
+  sudo: no
+  delegate_to: localhost
+

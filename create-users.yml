@@ -1,0 +1,7 @@
+---
+- name: Create fabric group and user
+  become: yes
+  hosts: "{{ target_machine }}"
+  tasks:
+    - include_role:
+        name: create-user

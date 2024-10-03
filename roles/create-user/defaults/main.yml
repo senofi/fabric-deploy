@@ -1,0 +1,6 @@
+---
+
+fabric_user_name: "fabric"
+# docker_user_name: "docker"
+# docker_user_group: "docker"
+fabric_user_group: "fabric"

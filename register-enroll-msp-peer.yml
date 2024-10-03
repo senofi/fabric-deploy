@@ -1,0 +1,12 @@
+---
+# Deploy HLF operations console
+- hosts: "{{ target_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  tasks:
+    - set_fact:
+        msps: "{{peer_msps}}"
+    - include_role:
+        name: register
+    - include_role:
+        name: enroll

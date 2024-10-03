@@ -1,0 +1,16 @@
+---
+- set_fact:
+    msp: "{{ msp_var }}"
+
+- name: Debug
+  debug:
+    msg: "Stop CA MSP stack  {{ msp }} file {{ config_folder }}/stack_{{ msp.stack_ca }}.yaml"
+
+- name: Stop swarm stacks
+  shell: >
+    bash -l -c "docker stack rm {{ msp.stack_ca }}"
+
+- name: Waiting for the stack(s) to stop
+  pause:
+    seconds: "{{ sleep_time_sec }}"
+  when: msp.reset is defined and msp.reset == "yes"

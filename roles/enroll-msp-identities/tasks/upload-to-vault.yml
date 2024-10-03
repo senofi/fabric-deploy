@@ -1,0 +1,12 @@
+---
+- set_fact:
+    ca: "{{ enroll_ca }}"
+
+- include_tasks: upload-to-vault-for-user.yml
+  vars:
+    vault_msp: "{{ msp_def_enroll }}"
+    vault_ca: "{{ ca }}"
+  loop: "{{ ca.users }}"
+  loop_control:
+    loop_var: vault_user  
+  when: ca.users is defined

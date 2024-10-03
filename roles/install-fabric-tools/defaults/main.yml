@@ -1,0 +1,13 @@
+---
+fabric_ca_version: 1.5.11
+fabric_version: 2.5.8
+
+fabric_user_name: "fabric"
+root_working_folder: "/srv/fabric"
+env_id: test
+
+fab_home_folder: "{{root_working_folder}}/{{env_id}}/{{fabric_version}}"
+fab_ca_cli_url: "https://github.com/hyperledger/fabric-ca/releases/download/v{{fabric_ca_version}}/hyperledger-fabric-ca-linux-amd64-{{fabric_ca_version}}.tar.gz"
+fab_ca_cli_arch: "hyperledger-fabric-ca-linux-amd64-{{fabric_ca_version}}.tar.gz"
+fab_tools_url: "https://github.com/hyperledger/fabric/releases/download/v{{fabric_version}}/hyperledger-fabric-linux-amd64-{{fabric_version}}.tar.gz"
+fab_tools_arch: "hyperledger-fabric-linux-amd64-{{fabric_version}}.tar.gz"

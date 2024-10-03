@@ -1,0 +1,86 @@
+# Generate the stack file and run the stack
+---
+#Upload the Admin user certs and private key to the manager machine
+- name: Create {{ config_folder }}
+  file:
+    state: directory
+    path: "{{ config_folder }}"
+    mode: "u=rwx,g=rx,o=rwx"
+    owner: "{{ fabric_user_name }}"
+  become: yes
+  become_user: root
+
+- name: "Generate stack file for webapp for MSP '{{ app.msp }}'"
+  template:
+    src: "docker/stack_app.yaml.j2"
+    dest: "{{ config_folder }}/stack_app_{{ app.msp }}_{{ app.id }}.yaml"
+    trim_blocks: no
+    variable_start_string: "[["
+    variable_end_string: "]]"
+
+- name: "Generate fabric network json connection file for webapp for MSP '{{ app.msp }}'"
+  template:
+    src: "fabric/web-app-network-connection.yaml.j2"
+    dest: "{{ config_folder }}/network_config_{{ app.id }}.json"
+    trim_blocks: no
+    variable_start_string: "[{["
+    variable_end_string: "]}]"
+
+#Upload the Admin user certs and private key to the manager machine
+- name: Create {{ local_pki_folder }}
+  file:
+    state: directory
+    path: "{{ local_pki_folder }}/{{ app.domain }}/users/{{ app.adminUser }}/msp"
+    mode: "u=rwx,g=rx,o=rwx"
+    owner: "{{ fabric_user_name }}"
+  become: yes
+  become_user: root
+
+- set_fact:
+    auth: ""
+
+# Upload and unarchive the tar archive with MSP certs to the remote host
+- name: Upload the admin user PKI to the manager machine
+  unarchive:
+    src: "{{ pki_local_folder }}/{{ app.domain }}/msp-{{ app.msp }}-{{ app.domain }}/users/admin-{{ app.domain }}-{{ app.adminUser }}-pki.tar"
+    dest: "{{ local_pki_folder }}/{{ app.domain }}/users/"
+
+- name: Clear the source of the uploaded admin PKI
+  file:
+    state: absent
+    path: "{{ pki_local_folder }}/{{ app.domain }}/msp-{{ app.msp }}-{{ app.domain }}/users/admin-{{ app.domain }}-{{ app.adminUser }}-pki.tar"
+
+- name: login in the repository
+  docker_login:
+    registry: "{{ app.docker.repository.endpoint }}"
+    username: "{{ app.docker.repository.user }}"
+    password: "{{ app.docker.repository.password }}"
+    reauthorize: yes
+  when: app.docker.repository.endpoint is defined and app.docker.repository.user is defined and app.docker.repository.password is defined
+
+- name: login in the repository
+  docker_login:
+    username: "{{ app.docker.repository.user }}"
+    password: "{{ app.docker.repository.password }}"
+    reauthorize: yes
+  when: app.docker.repository.endpoint is not defined and app.docker.repository.user is defined and app.docker.repository.password is defined
+
+- set_fact:
+    auth: " --with-registry-auth"
+  when:  app.docker.repository.user is defined and app.docker.repository.password is defined 
+
+- name: Remove the old service
+  docker_swarm_service:
+    name: "{{ app.stack }}_{{ app.id }}"
+    state: absent
+
+- name: Remove the related secret of the old service
+  docker_secret:
+    name: "{{ app.stack }}_network_config_{{ app.id }}"
+    state: absent
+
+- name: Start swarm stacks
+  shell: >
+    bash -l -c "
+      export STACK={{ app.stack }}
+      docker stack deploy -c {{ config_folder }}/stack_app_{{ app.msp }}_{{ app.id }}.yaml {{ app.stack }}{{ auth }}"

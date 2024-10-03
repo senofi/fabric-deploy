@@ -1,0 +1,6 @@
+- file:
+    path: "{{ config_folder }}"
+    state: directory
+
+- include: gen-stacks-metric.yml
+    msp_msp_var="{{ metric_msp }}"

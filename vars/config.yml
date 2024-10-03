@@ -1,0 +1,282 @@
+
+###################### 
+
+### the ansible remote host name as defined in ansible hosts
+target_machine: ca
+
+fabric_user_name: "fabric"
+
+root_working_folder: "/srv/fabric"
+fabric_version: 2.5.8
+
+env_id: test
+
+#### Fabric Operations Console
+### Set the domain name of the Fabric Operations console.
+### The host name is usually a subdomain of your entity main domain ( e.g. https://fabric-operations-console.hlf.acme.com  )
+fabric_console_domain_name: fabric-console.hlf.acme.com
+#The port opened on the machine and mapped to the fabric operation console container port
+fabric_console_port: 4443
+
+#The external endpoint of the fabric operation console web interface
+fabric_console_host_url: "https://{{fabric_console_domain_name}}:443"
+
+### If TLS certs are already available , uncomment and configure as base64 encoded 
+# fabric_console_tls_key_b64: 
+# fabric_console_tls_cert_b64: 
+
+######################
+
+#### MSP name and domain. Do not use special characters, use letters.
+msp_domain: acme.com
+msp_name: acme
+######################
+
+#### MSP Certificate Authority Configuration ####
+ca_endpoint_host: fabric-ca.hlf.acme.com
+caTls_endpoint_host: fabric-tls-ca.hlf.acme.com
+ca_ops_endpoint_host: fabric-ca-ops.hlf.acme.com
+caTls_ops_endpoint_host: fabric-tls-ca-ops.hlf.acme.com
+
+ca_name: "{{msp_name}}ca"
+caTls_name: "{{msp_name}}tlsca"
+
+### CA API and CA operations ports, those ports are opened and mapped to the CA container ports
+ca_port: 5443
+caTls_port: 6443
+
+ca_ops_port: 7443
+caTls_ops_port: 8443
+
+### Set the external CA API and Operations endpoint URLs. If network load balancing is used those URL may refer to different DNS names on port 443.
+### The host name is usually a subdomain of your entity main domain ( e.g. https://ca.hlf.acme.com  https://ca-operations.hlf.acme.com , etc. )
+caTls_api_url: "https://{{caTls_endpoint_host}}:443"
+ca_api_url: "https://{{ca_endpoint_host}}:443"
+
+ca_ops_url: "https://{{ca_ops_endpoint_host}}:443"
+caTls_ops_url: "https://{{caTls_ops_endpoint_host}}:443"
+
+######################
+
+#### Peer Configuration ####
+peer_name: acmepeer1
+
+### Peer API and operations ports, those ports are opened and mapped to the peer container ports
+peer_port: 9443
+peer_ops_port: 10443
+webproxy_tls_port: 11443
+
+### Set the external Peer API endpoint and port. If network load balancing is used the endpoint may be a dedicated host and SSL 443 port.
+### The host name is usually a subdomain of your entity main domain ( e.g. https://peer1.hlf.acme.com )
+peer_endpoint_port: 443
+peer_endpoint_host: acmepeer1.hlf.acme.com
+
+### Set the external Peer Operations endpoint URL. If network load balancing is used the URL may refer to a dedicated host on port 443.
+### The host name is usually a subdomain of your entity main domain ( e.g. https://peer1-operations.hlf.acme.com )
+peer_ops_endpoint_url: "https://acmepeer1-ops.hlf.acme.com:443"
+
+### Set the external Peer GRPC Web proxy endpoint, port and URL. If network load balancing is used the URL may refer to a dedicated host on port 443.
+### The host name is usually a subdomain of your entity main domain ( e.g. https://peer1-grpcs-web.hlf.acme.com )
+webproxy_endpoint: acmepeer1-web-proxy.hlf.acme.com
+webproxy_endpoint_url: "https://{{webproxy_endpoint}}:443"
+
+######################
+
+
+###################### Fine Grain Configuration ######################
+
+
+###################### FABRIC OPS CONSOLE BEGIN ################################
+
+
+config_folder: "{{root_working_folder}}/{{env_id}}/config"
+fabric_console_config_folder_path: "{{ config_folder }}/fabric_console"
+fabric_console_stack: console
+fabric_console_subnet_cidr: 10.2.7.0/24
+fabric_console_image: ghcr.io/hyperledger-labs/fabric-console:latest
+fabric_console_fab_img_tag: "{{fabric_version}}"
+
+fabric_console_network: console
+fabric_console_tls_city: LA
+
+
+fabric_console_nginx_stack: console_nginx
+fabric_console_nginx_image: nginx
+fabric_console_nginx_port: 443
+
+
+###################### FABRIC OPS CONSOLE END ################################
+
+
+
+###################### FABRIC MSP CA BEGIN ################################
+
+msp_ca_admin_user: "{{msp_name}}caadminb"
+msp_peer_admin_user: "{{msp_name}}peerAdmin"
+msp_tls_ca_admin_user: "{{msp_name}}tlscaadminb"
+
+caMachine_name: "{{ca_endpoint_host}}"
+
+msp_cidr: "10.2.6.0/24"
+
+wf_id: "id_12345667890"
+
+fabric_ca_version: 1.5.11
+fab_couchdb_img_tag: 3.2.3
+
+sleepTime: 100
+
+certs_folder: "{{root_working_folder}}/{{env_id}}/msp_certs"
+
+data_folder: "{{root_working_folder}}/{{env_id}}/data"
+fab_home_folder: "{{root_working_folder}}/{{env_id}}/{{fabric_version}}"
+
+fab_ver: "{{fabric_version}}"
+fab_internal_ver: "{{fabric_version}}"
+fab_ca_img_tag: "{{fabric_ca_version}}"
+
+
+fab_img_tag: "{{fabric_version}}"
+fab_tools_arch: "hyperledger-fabric-linux-amd64-{{fabric_version}}.tar.gz"
+fab_tools_url: "https://github.com/hyperledger/fabric/releases/download/v{{fabric_version}}/hyperledger-fabric-linux-amd64-{{fabric_version}}.tar.gz"
+
+fab_ca_cli_arch: "hyperledger-fabric-ca-linux-amd64-{{fabric_ca_version}}.tar.gz"
+fab_ca_cli_url: "https://github.com/hyperledger/fabric-ca/releases/download/v{{fabric_ca_version}}/hyperledger-fabric-ca-linux-amd64-{{fabric_ca_version}}.tar.gz"
+
+sleep_time_sec: "{{ sleepTime }}"
+
+local_pki_folder: "{{root_working_folder}}/{{env_id}}/pki/{{msp_domain}}"
+
+pki_local_folder: "~/pki/{{env_id}}/{{wf_id}}"
+
+ca_msps:
+  - msp: "{{msp_name}}"
+    stack_ca: "boottls{{msp_name}}"
+    domain: "tls.{{msp_domain}}"
+    network_ca: "caboottls{{msp_name}}"
+    subnet_cidr_ca: 10.2.9.0/24
+    tls_ca: "yes"
+    reset: "no"
+    cas:
+      - ca: "boottls{{ca_name}}"
+        root: true
+        host: 0.0.0.0
+        port: 1048
+        ops_port: 1049
+        tls: true
+        user: "{{msp_ca_admin_user}}"
+        reset: "yes"
+        home: "{{data_folder}}/ca/{{msp_domain}}/boottls{{ca_name}}"
+        # labels: "[ 'node.labels.id == {{caMachine_name}}' ]"
+        users:
+          - user: server
+            type: peer
+            ou: peer
+            hosts: "'{{ca_endpoint_host}}','{{caTls_endpoint_host}}'"
+          - user: client
+            type: user
+            ou: admin
+            hosts: "client"
+  - msp: "{{msp_name}}"
+    stack_ca: "{{msp_name}}"
+    domain: "{{msp_domain}}"
+    network_ca: "{{msp_name}}"
+    reset: "no"
+    subnet_cidr_ca: "{{msp_cidr}}"
+    cas:
+      - ca: "{{ca_name}}"
+        root: true
+        tls: false
+        host: "{{ca_endpoint_host}}"
+        port: "{{ca_port}}"
+        ops_port: "{{ca_ops_port}}"
+        user: "{{msp_ca_admin_user}}"
+        home: "{{data_folder}}/ca/{{msp_domain}}/ca{{ca_name}}"
+        # labels: "[ 'node.labels.id == {{caMachine_name}}' ]"
+        reset: "yes"
+        users:
+          - user: "{{msp_peer_admin_user}}"
+            type: user
+            ou: admin
+            role: peer.admin
+      - ca: "{{caTls_name}}"
+        root: true
+        tls: true
+        host: "{{caTls_endpoint_host}}"
+        port: "{{caTls_port}}"
+        ops_port: "{{caTls_ops_port}}"
+        user: "{{msp_tls_ca_admin_user}}"
+        home: "{{data_folder}}/ca/{{msp_domain}}/tlsca{{caTls_name}}"
+        # labels: "[ 'node.labels.id == {{caMachine_name}}' ]"
+        reset: "yes"
+        users:
+          - user: "{{msp_peer_admin_user}}"
+            type: user
+            ou: admin
+            hosts: "'{{msp_peer_admin_user}}'"
+
+
+
+
+###################### FABRIC MSP CA END ################################
+
+
+
+###################### FABRIC MSP PEER BEGIN ################################
+
+
+
+# *********** Review and set ******************
+
+
+peer_msp_cidr: "10.2.1.0/24"
+
+msp_stack: "peer_{{msp_name}}_stack"
+
+# ********************************************* 
+
+peer_msps:
+  - msp: "{{msp_name}}"
+    stack: "{{msp_stack}}"
+    domain: "{{msp_domain}}"
+    network: "{{msp_name}}"
+    subnet_cidr: "{{peer_msp_cidr}}"
+    peers:
+
+      - peer: "{{peer_name}}"
+        log_level: DEBUG
+        endpointHost: "{{peer_endpoint_host}}"
+        endpointPort: "{{peer_endpoint_port}}"
+        hostname: "{{peer_endpoint_host}}"
+        port: "{{peer_port}}"
+        ops_port: "{{peer_ops_port}}"
+        peer_webproxy_endpoint: "{{webproxy_endpoint}}"
+        peer_webproxy_http_tlsport: "{{webproxy_tls_port}}"
+        # labels: "[ 'node.labels.id == {{caMachine_name}}' ]"
+          # - node.labels.id == "{{peer_machine_name}}"
+
+    cas:
+      - ca: "{{ca_name}}"
+        root: true
+        host: "{{ca_endpoint_host}}"
+        port: "{{ca_port}}"
+        user: "{{msp_ca_admin_user}}"
+        users:
+          - user: "{{peer_name}}"
+            type: peer
+            ou: peer
+            admin: "{{msp_peer_admin_user}}"
+
+      - ca: "{{caTls_name}}"
+        root: true
+        tls: true
+        host: "{{caTls_endpoint_host}}"
+        port: "{{caTls_port}}"
+        user: "{{msp_tls_ca_admin_user}}"
+        users:
+          - user: "{{peer_name}}"
+            type: peer
+            ou: peer
+            hosts: "'{{peer_endpoint_host}}'"
+
+###################### FABRIC MSP PEER END ################################

@@ -1,0 +1,7 @@
+---
+# Removes MSP CA servers
+- hosts: "{{ ca_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  roles:
+    - msp-remove

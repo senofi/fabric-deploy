@@ -1,0 +1,42 @@
+
+
+---
+- name: Create HLF home folder to extract the tools "{{fab_home_folder}}"
+  file:
+    path: "{{ fab_home_folder }}"
+    state: directory
+    mode: "u=rwx,g=rx,o=rwx"
+    owner: "{{ fabric_user_name }}"
+  become: yes
+  become_user: root
+
+- name: Download Fabric CA client archive (fabric-ca-client) to "{{ fab_home_folder }}/{{ fab_ca_cli_arch }}"
+  get_url:
+    url: "{{ fab_ca_cli_url }}"
+    dest: "{{ fab_home_folder }}/{{ fab_ca_cli_arch }}"
+    mode: 0755
+
+- name: Download Fabric Tools archive (configtx, crypto etc)
+  get_url:
+    url: "{{ fab_tools_url }}"
+    dest: "{{ fab_home_folder }}/{{ fab_tools_arch }}"
+    mode: 0755
+
+- name: Create symlink to HLF folder
+  file:
+    src: "{{ fab_home_folder }}"
+    dest: "{{ fab_home_folder }}/current"
+    state: link
+    owner: "{{ fabric_user_name }}"
+
+- name: Extract Fabric CA CLI archive
+  unarchive:
+    src: "{{ fab_home_folder }}/{{ fab_ca_cli_arch }}"
+    dest: "{{ fab_home_folder }}"
+    remote_src: yes
+
+- name: Extract HLF tools archive
+  unarchive:
+    src: "{{ fab_home_folder }}/{{ fab_tools_arch }}"
+    dest: "{{ fab_home_folder }}"
+    remote_src: yes

@@ -1,0 +1,46 @@
+{
+    "name": "[{[ app.msp ]}]-connection",
+    "version": "1.0.0",
+    "client": {
+        "organization": "[{[ app.msp ]}]",
+        "connection": {
+            "timeout": {
+                "peer": {
+                    "endorser": "300"
+                },
+                "orderer": "300"
+            }
+        }
+    },
+    "organizations": {
+        "[{[ app.msp ]}]": {
+            "mspid": "[{[ app.msp ]}]",
+            "peers": [
+            {% for currentPeer in app.peers %}
+              "[{[ currentPeer.peer ]}]" {% if not loop.last %},{% endif %}
+            {% endfor %}
+            ],
+            "adminPrivateKeyPEM": {
+                "path": "[{[ app.fabric_folder ]}]/pki/[{[ app.msp ]}]/admin/keystore/key.key"
+            },
+            "signedCertPEM": {
+                "path": "[{[ app.fabric_folder ]}]/pki/[{[ app.msp ]}]/admin/signcerts/cert.pem"
+            }
+        }
+    },
+    "peers": {
+      {% for currentPeer in app.peers %}
+         "[{[ currentPeer.peer ]}]": {
+            "url": "grpcs://[{[ currentPeer.endpointHost ]}]:[{[ currentPeer.endpointPort ]}]",
+            "tlsCACerts": {
+                "path": "[{[ app.fabric_folder ]}]/pki/[{[ app.msp ]}]/tlsca/cert.pem"
+            },
+            "grpcOptions": {
+                "grpc.keepalive_time_ms": 300000,
+                "grpc.keepalive_timeout_ms": 480000,
+                "grpc.keepalive_without_calls": "true"
+            }
+         }  {% if not loop.last %},{% endif %}
+      {% endfor %}
+    }
+}

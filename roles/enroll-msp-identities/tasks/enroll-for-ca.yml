@@ -1,0 +1,61 @@
+---
+- name: Debug
+  debug:
+    msg: "###### Enrolling for {{ enroll_ca }} ###############"
+
+- set_fact:
+    ca: "{{ enroll_ca }}"
+    msp_enroll: "{{ msp_def_enroll }}"
+
+- set_fact:
+    command_line: ""
+    protocol: "http"
+  when: msp_enroll.tls_ca is defined and msp_enroll.tls_ca == "yes"
+
+- set_fact:
+    path_tls: "{{ certs_folder }}/tls.{{ msp_enroll.domain }}/msp/users/client/tls"
+
+- set_fact:
+    command_line: "--tls.certfiles {{ path_tls }}/ca.crt --tls.client.certfile {{ path_tls }}/cert.crt --tls.client.keyfile {{ path_tls }}/key.key"
+    protocol: "https"
+  when: msp_enroll.tls_ca is undefined or msp_enroll.tls_ca != "yes"
+
+- name: Removing existing folder
+  file:
+    path: "{{ local_pki_folder }}/{{ msp_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/{{ ca.ca }}"
+    state: absent
+  loop: "{{ ca.users }}"
+  loop_control:
+    loop_var: user_ca
+
+- name: Re-create folder  existing folder
+  file:
+    path: "{{ local_pki_folder }}/{{ msp_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/{{ ca.ca }}"
+    state: directory
+  loop: "{{ ca.users }}"
+  loop_control:
+    loop_var: user_ca
+
+- name: Enroll users for CA {{ ca.ca }} of type 
+  shell: >
+    fabric-ca-client enroll -H {{ local_pki_folder }}/{{ msp_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/{{ ca.ca }} -u {{ protocol }}://{{ user_ca.user }}:password@{{ ca.host }}:{{ ca.port }} {{ command_line }}
+  environment:
+    PATH: "{{ fab_home_folder }}/current/bin"
+  loop: "{{ ca.users }}"
+  loop_control:
+    loop_var: user_ca  
+  when: ca.users is defined and (ca.tls is undefined or ca.tls != true)
+
+
+- name: Enroll users for TLS CA {{ ca.ca }}
+  shell: >
+    fabric-ca-client enroll -H {{ local_pki_folder }}/{{ msp_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/{{ ca.ca }} -d --enrollment.profile tls -u {{ protocol }}://{{ user_ca.user }}:password@{{ ca.host }}:{{ ca.port }} --csr.hosts {{ user_ca.hosts }} {{ command_line }}
+  environment:
+    PATH: "{{ fab_home_folder }}/current/bin"
+  loop: "{{ ca.users }}"
+  loop_control:
+    loop_var: user_ca  
+  when: ca.users is defined and (ca.tls is defined and ca.tls == true)
+
+
+

@@ -1,0 +1,71 @@
+---
+- set_fact:
+    console_export_folder: "{{ data_folder }}/fabric-console/export/users/{{ msp_name }}"
+
+- name: "Create fabric console export user data folder {{console_export_folder}}"
+  file:
+    path: "{{console_export_folder}}"
+    state: directory
+    mode: "u=rwx,g=rwx,o=rwx"
+    owner: "{{ fabric_user_name }}"
+  become: yes
+
+- block:
+# Export peer admin identity to a json file
+    - name: Load cert in Base64 from the file system
+      slurp:
+        src: "{{ local_pki_folder }}/{{ msp_domain }}/users/{{user_name}}/msp/signcerts/cert.pem"
+      register: loaded_cert_file
+
+    - set_fact:
+        user_cert: "{{ loaded_cert_file.content }}"
+    
+    - name: Load private key in Base64 from the file system
+      slurp:
+        src: "{{ local_pki_folder }}/{{ msp_domain }}/users/{{user_name}}/msp/keystore/key.key"
+      register: loaded_key_file
+
+    - set_fact:
+        user_private_key: "{{ loaded_key_file.content }}"
+
+    - name: "Export user {{user_name}} to json file {{console_export_folder}}/fabric_user_{{msp_name}}_{{ user_name }}.json"
+      template:
+        src: "fabric/config-console-msp-user.json.j2"
+        dest: "{{console_export_folder}}/fabric_user_{{msp_name}}_{{ user_name }}.json"
+        trim_blocks: no
+        variable_start_string: "[["
+        variable_end_string: "]]"
+  when: ca_admin is not defined or ca_admin != true
+
+- block:
+# Export CA admin identity to a json file
+    - name: Load cert in Base64 from the file system
+      slurp:
+        src: "{{ local_pki_folder }}/{{ msp_domain }}/fabric-ca/{{user_ca_name}}/clients/{{user_name}}/msp/signcerts/cert.pem"
+      register: loaded_cert_file
+
+    - set_fact:
+        user_cert: "{{ loaded_cert_file.content }}"
+    - name: Find the key file name
+      find:
+        paths: "{{ local_pki_folder }}/{{ msp_domain }}/fabric-ca/{{user_ca_name}}/clients/{{user_name}}/msp/keystore"
+      register: result
+    - set_fact:
+        key_file_path: "{{result.files|map(attribute='path')|list}}"
+
+    - name: "Load private key in Base64 from the file system {{key_file_path[0]}}"
+      slurp:
+        src: "{{key_file_path[0]}}"
+      register: loaded_key_file
+
+    - set_fact:
+        user_private_key: "{{ loaded_key_file.content }}"
+
+    - name: "Export user {{user_name}} to json file {{console_export_folder}}/fabric_user_{{msp_name}}_{{user_ca_name}}_{{ user_name }}.json"
+      template:
+        src: "fabric/config-console-msp-user.json.j2"
+        dest: "{{console_export_folder}}/fabric_user_{{msp_name}}_{{user_ca_name}}_{{ user_name }}.json"
+        trim_blocks: no
+        variable_start_string: "[["
+        variable_end_string: "]]"
+  when: ca_admin is defined and ca_admin == true

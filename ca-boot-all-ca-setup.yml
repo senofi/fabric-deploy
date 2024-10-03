@@ -1,0 +1,12 @@
+---
+# Start the temporary TLS root CA to issue TLS certs for the CA servers
+
+- hosts: "{{ ca_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  vars:
+    actionTag: prepare
+  roles:
+    - role: ca-root-temp-boot
+    - role: ca-root-boot
+

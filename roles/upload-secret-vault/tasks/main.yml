@@ -1,0 +1,2 @@
+- include: create-secret-on-vault.yml
+    vault_identity="{{ vault_create_identity }}"

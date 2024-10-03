@@ -1,0 +1,49 @@
+- name: Remove the node service
+  docker_swarm_service:
+    name: "{{ node.stack }}_{{ node.id }}"
+    state: absent
+
+- name: Remove the node couchDB service if present
+  docker_swarm_service:
+    name: "{{ node.stack }}_couch{{ node.id }}"
+    state: absent
+
+- name: Remove the related secret of the old service
+  docker_secret:
+    name: "{{ msp.id }}_tls_cert_{{ node.id }}"
+    state: absent
+
+- name: Remove the related secret of the old service
+  docker_secret:
+    name: "{{ msp.id }}_tls_key_{{ node.id }}"
+    state: absent
+
+- name: Remove the related secret of the old service
+  docker_secret:
+    name: "{{ msp.id }}_tls_ca_{{ node.id }}"
+    state: absent
+
+- name: Remove the related secret of the old service
+  docker_secret:
+    name: "{{ msp.id }}_msp_admin_{{ node.id }}"
+    state: absent
+
+- name: Remove the related secret of the old service
+  docker_secret:
+    name: "{{ msp.id }}_msp_key_{{ node.id }}"
+    state: absent
+
+- name: Remove the related secret of the old service
+  docker_secret:
+    name: "{{ msp.id }}_msp_sign_cert_{{ node.id }}"
+    state: absent
+
+- name: Remove the related secret of the old service
+  docker_secret:
+    name: "{{ msp.id }}_msp_ca_{{ node.id }}"
+    state: absent
+
+- name: Remove the related msp config secret
+  docker_secret:
+    name: "{{ msp.id }}_msp_config_{{ node.id }}"
+    state: absent

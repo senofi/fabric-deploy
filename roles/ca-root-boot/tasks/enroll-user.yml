@@ -1,0 +1,13 @@
+---
+- name: Enroll admin user
+  shell: >
+    fabric-ca-client enroll -H {{ local_pki_folder }}/{{ msp.domain }}/fabric-ca/{{ enr_user.ca }}/clients/{{ enr_user.user }} -u {{ protocol }}://{{ enr_user.user }}:adminpw@{{ enr_user.host }}:{{ enr_user.port }} {{ command_line }}
+  environment:
+    PATH: "{{ fab_home_folder }}/current/bin"
+
+- include_tasks: upload-to-vault-admin.yml
+  vars:
+    vault_msp: "{{ msp }}"
+    vault_ca: "{{ enr_user }}"
+    vault_user: "{{ enr_user }}"
+  when: vault is defined

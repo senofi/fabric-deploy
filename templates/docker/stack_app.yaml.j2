@@ -1,0 +1,79 @@
+version: "3.6"
+services:
+  [[ app.id ]]:
+    networks:
+      - [[ app.network.id ]]{% if app.network.aliases is defined %}:
+        aliases:
+{% for alias in app.network.aliases %}
+          -  [[ alias ]]
+{% endfor %}{% endif %}{% if app.network.labels is defined %}
+    deploy:
+      placement:
+        constraints:{% for label in app.network.labels %}
+          - [[ label ]]
+          {% endfor %}{% endif %}
+    image: [[ app.docker.image ]]:[[ app.docker.tag ]]
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${STACK}_[[ app.network.id ]]
+      - CONS_FABRIC_MSP_ID=[[ app.msp ]]
+      - CONS_FABRIC_MSP_DOMAIN=[[ app.domain ]]
+      - CONS_FABRIC_FOLDER=[[ app.fabric_folder ]]
+      {% if app.env_params is defined %}{% for param in app.env_params %}
+      - [[ param.key ]]=[[ param.value ]]
+      {% endfor %}{% endif %}{% if app.command is defined %}
+    command: [[ app.command ]]{% endif %}
+    secrets:
+      - source: msp_tlsca_cert
+        target: [[ app.fabric_folder ]]/pki/[[app.msp]]/tlsca/cert.pem{% if app.docker.containerUserId is defined %}
+        uid: '[[ app.docker.containerUserId ]]'
+        mode: 0440{% endif %}
+      - source: admin_cert
+        target: [[ app.fabric_folder ]]/pki/[[app.msp]]/admin/signcerts/cert.pem{% if app.docker.containerUserId is defined %}
+        uid: '[[ app.docker.containerUserId ]]'
+        mode: 0440{% endif %}
+      - source: admin_pk
+        target: [[ app.fabric_folder ]]/pki/[[app.msp]]/admin/keystore/key.key{% if app.docker.containerUserId is defined %}
+        uid: '[[ app.docker.containerUserId ]]'
+        mode: 0440{% endif %}
+      - source: network_config_[[ app.id ]]
+        target: [[ app.fabric_folder ]]/network/[[app.msp]]/connection.json{% if app.docker.containerUserId is defined %}
+        uid: '[[ app.docker.containerUserId ]]'
+        mode: 0440{% endif %}
+{% if app.docker.containerUser is defined %}
+    user: [[ app.docker.containerUser ]]{% endif %}
+    volumes:
+        - /var/run/:/host/var/run/
+    {% if app.volumes is defined %}{% for vol in app.volumes  %}
+        - [[app.id]]_[[ vol.name ]]:[[ vol.path ]]
+    {% endfor %}{%endif%}
+{% if app.ports is defined %}
+    ports:
+    {% for port in app.ports  %}
+      - [[ port.external ]]:[[ port.internal ]]
+    {% endfor %} {%endif%}
+
+{% if app.volumes is defined %}
+volumes:{% for vol in app.volumes %}
+  [[app.id]]_[[ vol.name ]]:
+{% endfor %}{%endif%}
+
+secrets:
+  msp_tlsca_cert:
+      file: [[ certs_folder ]]/[[ app.domain  ]]/msp/tlscacerts/cert.pem
+  admin_cert:
+      file: [[ local_pki_folder ]]/[[ app.domain ]]/users/[[ app.adminUser ]]/msp/signcerts/cert.pem
+  admin_pk:
+      file: [[ local_pki_folder ]]/[[ app.domain ]]/users/[[ app.adminUser ]]/msp/keystore/key.key
+  network_config_[[ app.id ]]:
+      file: [[ config_folder ]]/network_config_[[ app.id ]].json
+
+
+networks:
+  [[ app.network.id ]]:
+    driver: overlay
+    attachable: true{% if app.network.subnet_cidr is defined %}
+    ipam:
+      driver: default
+      config:
+        - subnet: [[ app.network.subnet_cidr ]]{% endif %}

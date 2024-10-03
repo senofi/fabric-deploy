@@ -1,0 +1,8 @@
+---
+# Upload the MSP public certs to the machine where the genesis block will be generated
+- hosts: "{{ node_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  
+  roles:
+    - upload-certs

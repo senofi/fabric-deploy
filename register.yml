@@ -1,0 +1,9 @@
+---
+# Register and enroll the described identities - peers and users
+# Requires Setup of Fabric CA CLI and CA server up and running
+- hosts: "{{ ca_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+
+  roles:
+   - register

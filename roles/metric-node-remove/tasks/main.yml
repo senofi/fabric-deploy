@@ -1,0 +1,7 @@
+- file:
+    path: "{{ config_folder }}"
+    state: directory
+
+- include: remove-metric-node.yml
+    msp_msp_var="{{ metric_msp }}"
+   

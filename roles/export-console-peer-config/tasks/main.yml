@@ -1,0 +1,59 @@
+---
+- name: Load ca cert in Base64 from the file system
+  slurp:
+    src: "{{ local_pki_folder }}/{{ msp_domain }}/users/{{msp_peer_admin_user}}/msp/cacerts/ca.cert"
+  register: loaded_cert_file
+- set_fact:
+    ca_root_cert: "{{ loaded_cert_file.content }}"
+
+
+- name: Load ca tls cert in Base64 from the file system
+  slurp:
+    src: "{{ local_pki_folder }}/{{ msp_domain }}/users/{{msp_peer_admin_user}}/tls/ca.crt"
+  register: loaded_tlscert_file
+- set_fact:
+    ca_tls_root_cert: "{{ loaded_tlscert_file.content }}"
+
+- name: Load admin cert in Base64 from the file system
+  slurp:
+    src: "{{ local_pki_folder }}/{{ msp_domain }}/users/{{msp_peer_admin_user}}/msp/signcerts/cert.pem"
+  register: loaded_admincert_file
+- set_fact:
+    msp_admin_cert: "{{ loaded_admincert_file.content }}"
+
+- name: Load peer cert in Base64 from the file system
+  slurp:
+    src: "{{ local_pki_folder }}/{{ msp_domain }}/peers/{{peer_name}}/msp/signcerts/cert.pem"
+  register: loaded_peercert_file
+- set_fact:
+    peer_cert: "{{ loaded_peercert_file.content }}"
+
+- name: Load peer tls cert in Base64 from the file system
+  slurp:
+    src: "{{ local_pki_folder }}/{{ msp_domain }}/peers/{{peer_name}}/tls/cert.crt"
+  register: loaded_peertlscert_file
+- set_fact:
+    peer_tls_cert: "{{ loaded_peertlscert_file.content }}"
+
+- set_fact:
+    console_export_folder: "{{ data_folder }}/fabric-console/export/peer"
+
+- name: Ensure fabric console export data folder
+  file:
+    path: "{{console_export_folder}}"
+    state: directory
+    mode: "u=rwx,g=rwx,o=rwx"
+    owner: "{{ fabric_user_name }}"
+  become: yes
+
+- name: "Generate farbic operations console peer import json {{console_export_folder}}/fabric_console_peer_{{msp_name}}_{{ peer_name }}.json"
+  template:
+    src: "fabric/config-console-peer.json.j2"
+    dest: "{{console_export_folder}}/fabric_console_peer_{{msp_name}}_{{ peer_name }}.json"
+    trim_blocks: no
+    variable_start_string: "[["
+    variable_end_string: "]]"
+
+- name: Backup the config file
+  shell: >
+    cp -r {{console_export_folder}}/fabric_console_peer_{{msp_name}}_{{ peer_name }}.json {{console_export_folder}}/fabric_console_peer_{{msp_name}}_{{ peer_name }}_{{ansible_date_time.iso8601_basic_short}}.json

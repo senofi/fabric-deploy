@@ -1,0 +1,6 @@
+---
+#Upload MSPs public certs (CA and TLS CA) to the remote machine.
+#The MSP certs are expected to be available as tar archive in ~/pki/ folder
+- include: uploadMSPCerts.yml
+  loop: "{{ msps }}"
+  when: msps is defined

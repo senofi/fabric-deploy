@@ -1,0 +1,21 @@
+---
+#### Archive and copy the Admin user PKI to the local machine ####
+- name: Create tar archive with users crypto
+  command: tar -cvf {{ local_pki_folder }}/{{ app.domain }}/users/admin-{{ app.domain }}-{{ app.adminUser }}-pki.tar {{ app.adminUser }}/msp
+  args:
+    chdir: "{{ local_pki_folder }}/{{ app.domain }}/users"
+
+- name: Create {{ local_pki_folder }}
+  file:
+    state: directory
+    path: "{{ pki_local_folder }}/{{ app.domain }}/msp-{{ app.msp }}-{{ app.domain }}/users"
+  sudo: no
+  delegate_to: localhost
+
+- name: Store temporary the PKI archive
+  fetch:
+    src: "{{ local_pki_folder }}/{{ app.domain }}/users/admin-{{ app.domain }}-{{ app.adminUser }}-pki.tar"
+    dest: "{{ pki_local_folder }}/{{ app.domain }}/msp-{{ app.msp }}-{{ app.domain }}/users/"
+    flat: yes
+
+# ##########################################

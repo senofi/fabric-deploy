@@ -1,0 +1,8 @@
+---
+# Removes MSP stack
+
+- hosts: "{{ manager_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  roles:
+    - msp-remove-stack

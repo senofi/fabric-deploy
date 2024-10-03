@@ -1,0 +1,8 @@
+---
+# Deploy HLF operations console
+- hosts: "{{ manager_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  tasks:
+    - include_role:
+        name: config-fabric-operations-console

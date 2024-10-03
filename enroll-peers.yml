@@ -1,0 +1,14 @@
+---
+#- hosts: "{{ target_machine }}"
+#  become: yes
+#  become_user: "{{ fabric_user_name | default('fabric') }}"
+#  roles:
+#    - setup
+
+# Enroll peers to the CA servers
+#- hosts: "{{ target_machine }}"
+#  become: yes
+#  become_user: "{{ fabric_user_name | default('fabric') }}"
+#  roles:
+#    - upload-certs
+#    - enroll

@@ -1,0 +1,9 @@
+---
+#Upload MSPs public certs (CA and TLS CA) to the remote machine.
+# Those certs are needed for:
+# - Ordering service machine for genesis block generation (uploads all participating MSP certs)
+# - MSP machine for TLS connection from a client (uploads ordering service certs and the MSP certs of the other organizations)
+- include: uploadMSPCerts.yml
+  loop: "{{ certs_upload_msps }}"
+  loop_control:
+    loop_var: msp_var

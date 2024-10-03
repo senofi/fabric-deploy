@@ -1,0 +1,31 @@
+---
+- set_fact:
+    msp: "{{ msp_msp_var }}"
+
+- file:
+    path: "{{ config_folder }}/{{ msp.msp }}"
+    state: directory
+    mode: "u=rwx,g=r"
+    owner: "{{ fabric_user_name }}"
+  become_user: root
+
+- name: "Generate MSP peer config yaml file'{{ msp.msp }}'"
+  template:
+    src: "fabric/msp_config.yaml.j2"
+    dest: "{{ config_folder }}/{{ msp.msp }}/config.yaml"
+    trim_blocks: no
+    variable_start_string: "[["
+    variable_end_string: "]]"
+
+- name: "Generate peer organizations config for organization '{{ msp.msp }}'"
+  template:
+    src: "docker/stack_msp.yaml.j2"
+    dest: "{{ config_folder }}/stack_{{ msp.stack }}.yaml"
+    trim_blocks: no
+    variable_start_string: "[["
+    variable_end_string: "]]"
+
+
+- name: Backup the stack file
+  shell: >
+    cp -r {{ config_folder }}/stack_{{ msp.stack }}.yaml {{ config_folder }}/stack_{{ msp.stack }}_{{ansible_date_time.iso8601_basic_short}}.yaml

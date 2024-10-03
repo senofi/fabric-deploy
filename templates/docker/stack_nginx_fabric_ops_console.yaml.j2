@@ -1,0 +1,17 @@
+version: "3.6"
+
+services:
+    nginx-console:
+        image: [[ fabric_console_nginx_image ]]
+        ports:
+            - "[[ fabric_console_nginx_port ]]:443"
+        volumes:
+            - [[ fabric_console_config_folder_path]]/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+            - [[fabric_console_config_folder_path]]/nginx/tls.key:/root/ssl/key.pem
+            - [[fabric_console_config_folder_path]]/nginx/tls.pem:/root/ssl/cert.pem
+        networks:
+            - [[ fabric_console_network ]]
+
+networks:
+  [[ fabric_console_network ]]:
+    external: true

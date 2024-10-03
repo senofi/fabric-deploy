@@ -1,0 +1,10 @@
+---
+- name: Debug health check MSP variable
+  debug:
+    msg: "###### Health check node MSP {{ hc_msp }} ###############"
+- name: Debug health check node variable
+  debug:
+    msg: "###### Health check node MSP {{ hc_node }} ###############"
+
+- include_tasks: health-check.yml
+

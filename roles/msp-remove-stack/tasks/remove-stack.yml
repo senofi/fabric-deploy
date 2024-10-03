@@ -1,0 +1,13 @@
+- name: Remove the MSP stack
+  docker_stack:
+    name: "{{ msp.stack }}"
+    state: absent
+
+- name: Remove additional the Service Provider stacks
+  docker_stack:
+    name: "{{ stack }}"
+    state: absent
+  loop: "{{ msp.stacks }}"
+  loop_control:
+    loop_var: stack
+  when: msp.stacks is defined

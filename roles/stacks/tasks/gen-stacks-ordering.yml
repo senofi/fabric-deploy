@@ -1,0 +1,27 @@
+---
+- set_fact:
+    msp: "{{ msp_ord_var }}"
+
+- name: Debug Generate Docker stacks file for orderers
+  debug:
+    msg: "Generating for orderers {{ msp.orderers }}"
+
+- name: Debug Generate Docker stacks file for zookeepers
+  debug:
+    msg: "Generate for zookeepers {{ msp.zks }}"
+
+- name: Debug Generate Docker stacks file for kafkas
+  debug:
+    msg: "Generate for zookeepers {{ msp.kafkas }}"
+
+- name: Debug Generate stack file
+  debug:
+    msg: "Output {{ config_folder }}/stack_{{ msp.msp }}.yaml"
+
+- name: "Generate ordering organizations config for '{{ msp.msp }}'"
+  template:
+    src: "docker/stack_ordering.yaml.j2"
+    dest: "{{ config_folder }}/stack_{{ msp.msp }}.yaml"
+    trim_blocks: no
+    variable_start_string: "[["
+    variable_end_string: "]]"

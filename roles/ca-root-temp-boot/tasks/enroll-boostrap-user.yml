@@ -1,0 +1,52 @@
+---
+- set_fact:
+    msp: "{{ msp_var }}"
+
+- name: Debug
+  debug:
+    msg: "Enroll CA bootstrap users for org {{ msp }}"
+  loop: "{{ msp.cas }}"
+  when: msp.cas is defined
+
+- set_fact:
+    command_line: ""
+    protocol: "http"
+  when: msp.tls_ca is defined and msp.tls_ca == "yes"
+
+- set_fact:
+    path_tls: "{{ certs_folder }}/tls.{{ msp.domain }}/msp/users/client/tls"
+
+- set_fact:
+    command_line: "--tls.certfiles {{ path_tls }}/ca.crt --tls.client.certfile {{ path_tls }}/cert.crt --tls.client.keyfile {{ path_tls }}/key.key"
+    protocol: "https"
+  when: msp.tls_ca is undefined or msp.tls_ca != "yes"
+
+
+- name: Create client folders
+  file:
+    path: "{{ local_pki_folder }}/{{ msp.domain }}/fabric-ca/{{ item.ca }}/clients/{{ item.user }}"
+    state: absent
+  loop: "{{ msp.cas }}"
+  when: msp.cas is defined
+
+- name: Create client folders
+  file:
+    path: "{{ local_pki_folder }}/{{ msp.domain }}/fabric-ca/{{ item.ca }}/clients/{{ item.user }}"
+    state: directory
+  loop: "{{ msp.cas }}"
+  when: msp.cas is defined
+
+- include_tasks: enroll-user.yml
+  loop: "{{ msp.cas }}"
+  loop_control:
+    loop_var: enr_user
+  when: msp.cas is defined
+
+- include_tasks: copy-ca-certs.yml
+  vars:
+    enroll_msp: "{{ msp }}"
+  loop: "{{ msp.cas }}"
+  loop_control:
+    loop_var: enroll_ca
+  when: msp.cas is defined
+
