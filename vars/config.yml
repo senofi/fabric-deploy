@@ -1,7 +1,7 @@
 
 ###################### 
 
-### the ansible remote host name as dfined in ansible hosts
+### the ansible remote host name as defined in ansible hosts
 target_machine: ca
 
 fabric_user_name: "fabric"
@@ -19,7 +19,11 @@ fabric_console_domain_name: fabric-console.hlf.acme.com
 fabric_console_port: 4443
 
 #The external endpoint of the fabric operation console web interface
-fabric_console_host_url: "https://{{fabric-console.hlf.acme.com}}"
+fabric_console_host_url: "https://{{fabric_console_domain_name}}:443"
+
+### If TLS certs are already available , uncomment and configure as base64 encoded 
+# fabric_console_tls_key_b64: 
+# fabric_console_tls_cert_b64: 
 
 ######################
 
@@ -65,21 +69,16 @@ webproxy_tls_port: 11443
 ### Set the external Peer API endpoint and port. If network load balancing is used the endpoint may be a dedicated host and SSL 443 port.
 ### The host name is usually a subdomain of your entity main domain ( e.g. https://peer1.hlf.acme.com )
 peer_endpoint_port: 443
-peer_endpoint_host_name: acmepeer1.hlf.acme.com
+peer_endpoint_host: acmepeer1.hlf.acme.com
 
 ### Set the external Peer Operations endpoint URL. If network load balancing is used the URL may refer to a dedicated host on port 443.
 ### The host name is usually a subdomain of your entity main domain ( e.g. https://peer1-operations.hlf.acme.com )
-peer_ops_endpoint_url: "https://acmepeer1-ops.hlf.acme.com"
+peer_ops_endpoint_url: "https://acmepeer1-ops.hlf.acme.com:443"
 
 ### Set the external Peer GRPC Web proxy endpoint, port and URL. If network load balancing is used the URL may refer to a dedicated host on port 443.
 ### The host name is usually a subdomain of your entity main domain ( e.g. https://peer1-grpcs-web.hlf.acme.com )
 webproxy_endpoint: acmepeer1-web-proxy.hlf.acme.com
 webproxy_endpoint_url: "https://{{webproxy_endpoint}}:443"
-
-### If TLS certs are already available , uncomment and configure as base64 encoded 
-# fabric_console_tls_key_b64: 
-# fabric_console_tls_cert_b64: 
-
 
 ######################
 
@@ -206,7 +205,7 @@ ca_msps:
         host: "{{caTls_endpoint_host}}"
         port: "{{caTls_port}}"
         ops_port: "{{caTls_ops_port}}"
-        user: "{{msp_ca_admin_user}}"
+        user: "{{msp_tls_ca_admin_user}}"
         home: "{{data_folder}}/ca/{{msp_domain}}/tlsca{{caTls_name}}"
         # labels: "[ 'node.labels.id == {{caMachine_name}}' ]"
         reset: "yes"
@@ -235,7 +234,7 @@ peer_msp_cidr: "10.2.1.0/24"
 msp_stack: "peer_{{msp_name}}_stack"
 
 # ********************************************* 
-# peer_machine_name: "{{peer_endpoint_host_name}}"
+
 peer_msps:
   - msp: "{{msp_name}}"
     stack: "{{msp_stack}}"
@@ -273,7 +272,7 @@ peer_msps:
         tls: true
         host: "{{caTls_endpoint_host}}"
         port: "{{caTls_port}}"
-        user: "{{msp_ca_admin_user}}"
+        user: "{{msp_tls_ca_admin_user}}"
         users:
           - user: "{{peer_name}}"
             type: peer
