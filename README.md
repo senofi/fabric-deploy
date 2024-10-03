@@ -22,7 +22,13 @@ It is a good practice to use a dedicated subdomain to define the HLF endpoints (
 
 It is also possible to route the inbound traffic directly to the machine (without using load balancers) where the HLF containers are deployed. However that requires a public IP(s) and proper management of multiple ports. In some cases that may be a security concern.
 
+### Preparations ###
 The infrastructure should be prepared, configured and provisioned upfront before deploying the HLF nodes. That includes the preparation/configuration of the DNS names of the HLF endpoints, provision of the machines, provision of the load balancers and their respective configurations for inbound traffic rules, network shares, etc.
+You may decide to use a single or multiple machines to host the HLF nodes. A good practice is to distribute the loads across multiple machines. For example you may provision dedicated machines for each of the major system parts: 
+- Fabric Operation Console - little load is expected as the console is used for operation tasks. A machine with minimum of 2GB RAM and a single CPU may be used for the console deployment. A dedicated small file storage of 1 GB will be enough for the CA servers to operate properly.
+- Fabric CA servers - little load is expected as the CA servers are used register and issue certificates of the HLF peers and users. A machine with minimum of 2GB RAM and a single CPU may be used for the CA deployment. A dedicated small file storage of 1 GB will be enough for the CA servers to operate properly.
+- Fabric peer - the peer process business transactions. Depending on the application, the peer may be quite loaded and therefore may require high hardware machine profile. The bare minimum for a small application will be a 4GB RAM and 2 CPU, the file storage requirement depends on the expected application data.
+- Business application - the development and deployment of a business application is not part of the project. However, you may want to dedicated and size a machine based on the expected application load.
 
 ### Prerequisites ###
 1. Linux instance(s) where the HLF containers will be deployed. If more than one machines are used, repeat the step on each of the provisioned machines.
