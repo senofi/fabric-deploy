@@ -1,0 +1,43 @@
+---
+- set_fact:
+    fabric_console_env_folder: "{{fabric_console_config_folder_path}}/env"
+
+- name: "Create fabric console config env folder {{fabric_console_env_folder}}"
+  file:
+    path: "{{fabric_console_env_folder}}"
+    state: directory
+    mode: "u=rwx,g=rwx,o=r--"
+    owner: "{{ fabric_user_name }}"
+  become_user: root
+
+- set_fact:
+    fabric_console_tls_folder: "{{fabric_console_config_folder_path}}/tls"
+    
+- name: "Create fabric console config tls folder {{fabric_console_tls_folder}}"
+  file:
+    path: "{{fabric_console_tls_folder}}"
+    state: directory
+    mode: "u=rwx,g=rwx,o=r--"
+    owner: "{{ fabric_user_name }}"
+  become_user: root
+
+- name: "Generate farbic operations console self signed tls certs"
+  shell: >
+    openssl req -x509 -nodes -newkey rsa:2048 -keyout {{fabric_console_tls_folder}}/tls.key -out  {{fabric_console_tls_folder}}/tls.pem -sha256 -days 365 -subj "/C=GB/ST={{fabric_console_tls_city}}/L={{fabric_console_tls_city}}/O=ABC/OU=IT Department/CN={{fabric_console_domain_name}}"
+  when: fabric_console_tls_key_b64 is not defined or fabric_console_tls_cert_b64 is not defined
+
+- name: "Store provided tls key to tls folder"
+  copy: content="{{ fabric_console_tls_key_b64 | b64decode }}" dest={{fabric_console_tls_folder}}/tls.key
+  when: fabric_console_tls_key_b64 is defined and fabric_console_tls_cert_b64 is defined
+
+- name: "Store provided tls cert to tls folder"
+  copy: content="{{ fabric_console_tls_cert_b64 | b64decode }}" dest={{fabric_console_tls_folder}}/tls.pem
+  when: fabric_console_tls_key_b64 is defined and fabric_console_tls_cert_b64 is defined
+
+- name: "Generate farbic operations conssole config file"
+  template:
+    src: "fabric/config-fabric-operations-console.yaml.j2"
+    dest: "{{fabric_console_env_folder}}/config.yaml"
+    trim_blocks: no
+    variable_start_string: "[["
+    variable_end_string: "]]"

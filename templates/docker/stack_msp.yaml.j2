@@ -1,0 +1,194 @@
+version: "3.6"
+services:
+{% if msp.peers is defined %}{% for peer in msp.peers %}
+  [[ peer.peer ]]:
+    networks:
+      [[ msp.network ]]:
+        aliases:
+          - [[ peer.peer ]]{% if peer.aliases is defined %}
+{% for alias in peer.aliases %}
+          -  [[ alias ]]
+{% endfor %}{% endif %}{% if peer.labels is defined %}
+    deploy:
+      placement:
+        constraints:{% for label in peer.labels %}
+          - [[ label ]]
+          {% endfor %}{% endif %}
+    image: hyperledger/fabric-peer{% if fab_img_tag is defined %}:[[ fab_img_tag ]]{% endif %}
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${STACK}_[[ msp.network ]]
+      - CORE_PEER_ID=[[ peer.peer ]]
+      - CORE_OPERATIONS_LISTENADDRESS=:8443
+      - CORE_OPERATIONS_TLS_ENABLED=true
+      - CORE_OPERATIONS_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/cert.crt
+      - CORE_OPERATIONS_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/key.key
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_ADDRESS=[[ peer.peer ]]:7051
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couch[[ peer.peer ]]:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=pass
+      - CORE_PEER_MSPCONFIGPATH=mspconfig
+      - CORE_METRICS_PROVIDER=prometheus
+      - CORE_PEER_LOCALMSPID=[[ msp.msp ]]
+      - FABRIC_LOGGING_SPEC={% if peer.log_level is defined %}[[ peer.log_level ]]{% else %}INFO{% endif %}
+      - CORE_PEER_GOSSIP_ORGLEADER={% if peer.anchor is defined %}[[ "true" if peer.anchor else "false" ]]{% else %}false{% endif %}
+      - CORE_PEER_GOSSIP_USELEADERELECTION={% if peer.anchor is defined %}[[ "false" if peer.anchor else "true" ]]{% else %}true{% endif %}
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=[[ peer.endpointHost ]]:[[ peer.endpointPort ]]
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/cert.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/key.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    secrets:
+      - source: tls_key_[[ peer.peer ]]
+        target: /etc/hyperledger/fabric/tls/key.key
+      - source: tls_cert_[[ peer.peer ]]
+        target: /etc/hyperledger/fabric/tls/cert.crt
+      - source: tls_ca_[[ peer.peer ]]
+        target: /etc/hyperledger/fabric/tls/ca.crt
+      - source: msp_admin_[[ peer.peer ]]
+        target: /etc/hyperledger/fabric/mspconfig/admincerts/cert.pem
+      - source: msp_key_[[ peer.peer ]]
+        target: /etc/hyperledger/fabric/mspconfig/keystore/key.key
+      - source: msp_sign_cert_[[ peer.peer ]]
+        target: /etc/hyperledger/fabric/mspconfig/signcerts/cert.pem
+      - source: msp_ca_[[ peer.peer ]]
+        target: /etc/hyperledger/fabric/mspconfig/cacerts/ca.cert
+      - source: msp_config_[[ peer.peer ]]
+        target: /etc/hyperledger/fabric/mspconfig/config.yaml
+      - source: msp_config_[[ peer.peer ]]
+        target: /etc/hyperledger/fabric/msp/config.yaml
+    volumes:
+        - /var/run/:/host/var/run/
+        - [[ peer.peer ]]:/var/hyperledger/production
+    ports:
+      - [[ peer.port ]]:7051{% if peer.port_eventhub is defined %}
+      - [[ peer.port_eventhub ]]:7053{% endif %}
+      - [[ peer.ops_port ]]:8443
+
+
+  [[ peer.peer ]]_proxy:
+    networks:
+      [[ msp.network ]]:
+        aliases:
+          - [[ peer.peer ]]_proxy
+    image: ghcr.io/hyperledger-labs/grpc-web:latest
+    environment:
+      - LICENSE=accept
+      - BACKEND_ADDRESS=[[ peer.peer ]]:7051
+      - SERVER_TLS_CERT_FILE=/certs/tls/signcerts/cert.pem
+      - SERVER_TLS_KEY_FILE=/certs/tls/keystore/key.pem
+      - SERVER_TLS_CLIENT_CA_FILES=/certs/msp/tlscacerts/cacert-0.pem
+      - SERVER_BIND_ADDRESS=0.0.0.0
+      - SERVER_HTTP_DEBUG_PORT=8081
+      - SERVER_HTTP_TLS_PORT=7444
+      - BACKEND_TLS=true
+      - SERVER_HTTP_MAX_WRITE_TIMEOUT=5m
+      - SERVER_HTTP_MAX_READ_TIMEOUT=5m
+      - USE_WEBSOCKETS=true
+      - EXTERNAL_ADDRESS=[[ peer.peer_webproxy_endpoint ]]
+    secrets:
+      - source: tls_key_[[ peer.peer ]]
+        target: /certs/tls/keystore/key.pem
+      - source: tls_cert_[[ peer.peer ]]
+        target: /certs/tls/signcerts/cert.pem
+      - source: tls_ca_[[ peer.peer ]]
+        target: /certs/msp/tlscacerts/cacert-0.pem
+    ports:
+      - [[ peer.peer_webproxy_http_tlsport ]]:7444
+
+
+
+  couch[[ peer.peer ]]:
+    networks:
+      - [[ msp.network ]]{% if peer.labels is defined %}
+    deploy:
+      placement:
+        constraints:{% for label in peer.labels %}
+          - [[ label ]]
+          {% endfor %}{% endif %}
+    image: couchdb{% if fab_couchdb_img_tag is defined %}:[[ fab_couchdb_img_tag ]]{% endif %}
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=pass
+    volumes:
+      - [[ peer.peer ]]_cDB:/opt/couchdb/data
+{% endfor %}{% endif %}
+{% if msp.client is defined %}
+  [[ msp.client.name ]]:
+    networks:
+      - [[ msp.network ]]
+    tty: true
+    stdin_open: true
+    deploy:
+      placement:
+        constraints: 
+          - {% if msp.client.label is defined %}[[ msp.client.label ]]{% else %}node.role == manager{% endif %}
+    image: hyperledger/fabric-tools{% if fab_img_tag is defined %}:[[ fab_img_tag ]]{% endif %}
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - FABRIC_LOGGING_SPEC=INFO
+      #- CORE_LOGGING_LEVEL=INFO
+      - CORE_PEER_ID=[[ msp.client.name ]]
+      - CORE_PEER_ADDRESS=[[ msp.client.peer ]]:7051
+      - CORE_PEER_LOCALMSPID=[[ msp.msp ]]
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/[[ msp.domain ]]/users/[[ msp.client.user ]]/tls/cert.crt
+      - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/[[ msp.domain ]]/users/[[ msp.client.user ]]/tls/key.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/[[ msp.domain ]]/users/[[ msp.client.user ]]/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/[[ msp.domain ]]/users/[[ msp.client.user ]]/msp
+      - CA_ORD_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/certs/[[ msp.client.orderer_domain ]]/msp/tlscacerts/cert.pem
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+        - /var/run/:/host/var/run/{% if chaincode_folder is defined %}
+        - [[ chaincode_folder ]]:/opt/gopath/src/github.com/hyperledger/chaincode{% endif %}{% if chaincode_folder is undefined %}
+        - [[ config_folder ]]/[[ msp.domain ]]/chaincode:/opt/gopath/src/github.com/hyperledger/chaincode{% endif %}
+        - [[ local_pki_folder ]]/:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+        - [[ local_pki_folder ]]/[[ msp.domain ]]/users/[[ msp.client.user ]]/msp/signcerts/:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/[[ msp.domain ]]/users/[[ msp.client.user ]]/msp/admincerts
+        - [[ certs_folder ]]/:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/certs/
+        - [[ config_folder ]]/[[ msp.domain ]]/channel-artifacts/:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
+{% endif %}
+{% if msp.peers is defined %}
+volumes:{% for peer in msp.peers %}
+  [[ peer.peer ]]_cDB:
+  [[ peer.peer ]]:
+{% endfor %}
+
+secrets:
+{% for peer in msp.peers %}
+  tls_key_[[ peer.peer ]]:
+      file: [[ local_pki_folder ]]/[[ msp.domain ]]/peers/[[ peer.peer ]]/tls/key.key
+  tls_cert_[[ peer.peer ]]:
+      file: [[ local_pki_folder ]]/[[ msp.domain ]]/peers/[[ peer.peer ]]/tls/cert.crt
+  tls_ca_[[ peer.peer ]]:
+      file: [[ local_pki_folder ]]/[[ msp.domain ]]/peers/[[ peer.peer ]]/tls/ca.crt
+
+  msp_admin_[[ peer.peer ]]:
+      file: [[ local_pki_folder ]]/[[ msp.domain ]]/peers/[[ peer.peer ]]/msp/admincerts/cert.pem
+  msp_key_[[ peer.peer ]]:
+      file: [[ local_pki_folder ]]/[[ msp.domain ]]/peers/[[ peer.peer ]]/msp/keystore/key.key
+  msp_sign_cert_[[ peer.peer ]]:
+      file: [[ local_pki_folder ]]/[[ msp.domain ]]/peers/[[ peer.peer ]]/msp/signcerts/cert.pem
+  msp_ca_[[ peer.peer ]]:
+      file: [[ local_pki_folder ]]/[[ msp.domain ]]/peers/[[ peer.peer ]]/msp/cacerts/ca.cert
+
+  msp_config_[[ peer.peer ]]:
+      file: [[ config_folder ]]/[[ msp.msp ]]/config.yaml
+
+{% endfor %}
+{% endif %}
+
+networks:
+  [[ msp.network ]]:
+    driver: overlay
+    attachable: true{% if msp.subnet_cidr is defined %}
+    ipam:
+      driver: default
+      config:
+        - subnet: [[ msp.subnet_cidr ]]{% endif %}

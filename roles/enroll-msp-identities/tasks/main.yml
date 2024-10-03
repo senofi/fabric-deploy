@@ -1,0 +1,10 @@
+---
+# Requries as input the msp, corresponsing CA and list of users to enroll
+# The user input variables is enrollment_msp
+- name: Debug
+  debug:
+    msg: "###### Enroll section {{ enrollment_msp }} ###############"
+
+- include_tasks: enroll.yml
+  vars:
+    enroll_msp: "{{ enrollment_msp }}"

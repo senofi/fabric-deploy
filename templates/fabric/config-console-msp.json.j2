@@ -1,0 +1,39 @@
+{
+    "admins": [
+        "[[msp_admin_cert]]"
+    ],
+    "display_name": "[[msp_name]]",
+    "fabric_node_ous": {
+        "admin_ou_identifier": {
+            "certificate": "[[ca_cert]]",
+            "organizational_unit_identifier": "admin"
+        },
+        "client_ou_identifier": {
+            "certificate": "[[ca_cert]]",
+            "organizational_unit_identifier": "client"
+        },
+        "enable": true,
+        "orderer_ou_identifier": {
+            "certificate": "[[ca_cert]]",
+            "organizational_unit_identifier": "orderer"
+        },
+        "peer_ou_identifier": {
+            "certificate": "[[ca_cert]]",
+            "organizational_unit_identifier": "peer"
+        }
+    },
+    "host_url": "[[fabric_console_host_url]]",
+    "id": "[[msp_name]]",
+    "intermediate_certs": [],
+    "msp_id": "[[msp_name]]",
+    "name": "[[msp_name]]",
+    "root_certs": [
+        "[[ca_cert]]"
+    ],
+    "scheme_version": "v1",
+    "tls_intermediate_certs": [],
+    "tls_root_certs": [
+        "[[ca_tls_cert]]"
+    ],
+    "type": "msp"
+}

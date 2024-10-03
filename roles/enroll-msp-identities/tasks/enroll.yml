@@ -1,0 +1,31 @@
+---
+- set_fact:
+    mspc: "{{ enroll_msp }}"
+
+- name: Debug
+  debug:
+    msg: "###### Enroll for {{ mspc }} ###############"
+
+- include_tasks: enroll-for-ca.yml
+  vars:
+    msp_def_enroll: "{{ mspc }}"
+  loop: "{{ mspc.cas }}"
+  loop_control:
+    loop_var: enroll_ca  
+  when: mspc.cas is defined
+
+- include_tasks: upload-identity-certs.yml
+  vars:
+    msp_def_enroll: "{{ mspc }}"
+  loop: "{{ mspc.cas }}"
+  loop_control:
+    loop_var: enroll_ca
+  when: mspc.cas is defined
+
+- include_tasks: upload-to-vault.yml
+  vars:
+    msp_def_enroll: "{{ mspc }}"
+  loop: "{{ mspc.cas }}"
+  loop_control:
+    loop_var: enroll_ca
+  when: mspc.cas is defined and vault is defined

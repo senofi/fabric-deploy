@@ -1,0 +1,31 @@
+---
+- set_fact:
+    msp: "{{ msp_var }}"
+
+- block:
+  - name: "Reset  {{ ca_var.home }}"
+    become: yes
+    file:
+      state: absent
+      path: "{{ ca_var.home }}"
+    loop: "{{ msp.cas }}"
+    loop_control:
+      loop_var: ca_var
+    when: msp.cas is defined and ca_var.home is defined and ca_var.reset is defined and ca_var.reset == "yes"
+  become: yes
+  become_user: root
+
+- block:
+  - name: Create {{ ca_var.home }}
+    become: yes
+    file:
+      state: directory
+      path: "{{ ca_var.home }}"
+      mode: "u=rwx,g=rx,o=rwx"
+      owner: "{{ fabric_user_name }}"
+    loop: "{{ msp.cas }}"
+    loop_control:
+      loop_var: ca_var
+    when: msp.cas is defined and ca_var.home is defined
+  become: yes
+  become_user: root

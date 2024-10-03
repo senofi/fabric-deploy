@@ -1,0 +1,33 @@
+---
+- set_fact:
+    msp: "{{ item }}"
+
+- name: Create {{ certs_folder }}
+  file:
+    state: directory
+    path: "{{ certs_folder }}"
+
+# Upload and unarchive the tar archive with MSP certs to the remote host
+- name: Un archive MSP CA certs tar to remote host
+  unarchive:
+    src: "{{ pki_local_folder }}/{{ msp.domain }}/msp-{{ msp.msp }}-{{ msp.domain }}-msp-certs.tar"
+    dest: "{{ certs_folder }}"
+
+- name: Clear the source of the uploaded certs
+  file:
+    state: absent
+    path: "{{ pki_local_folder }}/{{ msp.domain }}/msp-{{ msp.msp }}-{{ msp.domain }}-msp-certs.tar"
+  sudo: no
+  delegate_to: localhost
+
+- name: Un archive MSP TLS CA tar to remote host
+  unarchive:
+    src: "{{ pki_local_folder }}/tls.{{ msp.domain }}/msp-{{ msp.msp }}-tls.{{ msp.domain }}-msp-certs.tar"
+    dest: "{{ certs_folder }}"
+
+- name: Clear the source of the uploaded certs
+  file:
+    state: absent
+    path: "{{ pki_local_folder }}/tls.{{ msp.domain }}/msp-{{ msp.msp }}-tls.{{ msp.domain }}-msp-certs.tar"
+  sudo: no
+  delegate_to: localhost

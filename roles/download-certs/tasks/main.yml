@@ -1,0 +1,8 @@
+---
+- include: downloadCerts.yml
+  loop: "{{ ordering }}"
+  when: ordering is defined
+
+- include: downloadCerts.yml
+  loop: "{{ certs_download_msps }}"
+  when: certs_download_msps is defined

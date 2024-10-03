@@ -1,0 +1,24 @@
+
+- block:
+  - name: Delete MSP config files from the File System
+    file:
+      state: absent
+      path: "{{ config_folder }}"
+
+  - name: Delete MSP data files from the File System
+    file:
+      state: absent
+      path: "{{ data_folder }}"
+
+  - name: Delete MSP PKI files from the File System
+    file:
+      state: absent
+      path: "{{ local_pki_folder }}"
+
+  - name: Delete MSP Certs files from the File System
+    file:
+      state: absent
+      path: "{{ certs_folder }}"
+  become: yes
+  become_user: root
+

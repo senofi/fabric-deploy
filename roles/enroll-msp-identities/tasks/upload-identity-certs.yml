@@ -1,0 +1,84 @@
+---
+# Copy the iedntity certs to the identity MSP and TLS folders. This is needed to do proper loading of the certs in the docker containers
+- set_fact:
+    ca: "{{ enroll_ca }}"
+
+- name: Copy identity TLS key to common MSP folder
+  shell: >
+    mkdir -p {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/tls/ && cp -r {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/{{ ca.ca }}/msp/keystore/* {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/tls/key.key
+  loop: "{{ ca.users }}"
+  loop_control:
+    loop_var: user_ca  
+  when: ca.users is defined and (ca.tls is defined and ca.tls == true)
+
+- name: Copy identity TLS certs to common MSP folder
+  shell: >
+   cp -r {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/{{ ca.ca }}/msp/signcerts/* {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/tls/cert.crt
+  loop: "{{ ca.users }}"
+  loop_control:
+    loop_var: user_ca  
+  when: ca.users is defined and (ca.tls is defined and ca.tls == true)
+
+- name: Copy TLS CA cert to identity tls MSP folder
+  shell: >
+   cp -r {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/{{ ca.ca }}/msp/tlscacerts/* {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/tls/ca.crt
+  loop: "{{ ca.users }}"
+  loop_control:
+    loop_var: user_ca  
+  when: ca.users is defined and (ca.tls is defined and ca.tls == true)  
+
+- name: Copy identity key to common MSP folder
+  shell: >
+    mkdir -p {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/msp/keystore/ && cp -r {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/{{ ca.ca }}/msp/keystore/* {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/msp/keystore/key.key
+  loop: "{{ ca.users }}"
+  loop_control:
+    loop_var: user_ca
+  when: ca.users is defined and (ca.tls is undefined or ca.tls != true)
+
+- name: Copy identity cert to common MSP folder
+  shell: >
+    mkdir -p {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/msp/signcerts/ && cp -r {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/{{ ca.ca }}/msp/signcerts/* {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/msp/signcerts/
+  loop: "{{ ca.users }}"
+  loop_control:
+    loop_var: user_ca  
+  when: ca.users is defined and (ca.tls is undefined or ca.tls != true)
+
+- name: Copy identity cert to admincerts MSP folder
+  shell: >
+    mkdir -p {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/msp/admincerts/ && cp -r {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/{{ ca.ca }}/msp/signcerts/* {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/msp/admincerts/
+  loop: "{{ ca.users }}"
+  loop_control:
+    loop_var: user_ca  
+  when: ca.users is defined and (ca.tls is undefined or ca.tls != true)
+
+- name: Copy CA cert to identity cacerts MSP folder
+  shell: >
+    mkdir -p {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/msp/cacerts/ && cp -r {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/{{ ca.ca }}/msp/cacerts/* {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/msp/cacerts/ca.cert
+  loop: "{{ ca.users }}"
+  loop_control:
+    loop_var: user_ca
+  when: ca.users is defined and (ca.tls is undefined or ca.tls != true)
+
+- include_tasks: upload-admin-certs.yml
+  vars:
+    en_msp: "{{ msp_def_enroll }}"
+  loop: "{{ ca.users }}"
+  loop_control:
+    loop_var: itm
+  when: ca.users is defined and (ca.tls is undefined or ca.tls != true)
+
+- include_tasks: copy-admin-certs-to-peers.yml
+  vars:
+    en_msp: "{{ msp_def_enroll }}"
+  loop: "{{ ca.users }}"
+  loop_control:
+    loop_var: itm
+  when: ca.users is defined and (ca.tls is undefined or ca.tls != true)
+
+- name: Copy client TLS certs to MSP certs folder
+  shell: >
+    mkdir -p {{ certs_folder }}/{{ msp_def_enroll.domain }}/msp/{{ user_ca.type }}s/{{ user_ca.user }}/tls && cp -r {{ local_pki_folder }}/{{ msp_def_enroll.domain }}/{{ user_ca.type }}s/{{ user_ca.user }}/tls/. {{ certs_folder }}/{{ msp_def_enroll.domain }}/msp/{{ user_ca.type }}s/{{ user_ca.user }}/tls
+  loop: "{{ ca.users }}"
+  loop_control:
+    loop_var: user_ca
+  when: msp_def_enroll.tls_ca is defined and msp_def_enroll.tls_ca == "yes" and user_ca.type == "user" and user_ca.user == "client"

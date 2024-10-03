@@ -1,0 +1,26 @@
+---
+# Generate docker stack files for the nodes of MSPs and ordering service
+- file:
+    path: "{{ config_folder }}"
+    state: directory
+
+- include_tasks: gen-stacks-msp.yml
+  loop: "{{ peer_msps }}"
+  loop_control:
+    loop_var: msp_msp_var
+  when: deploy_msps is defined and deploy_msps == true and peer_msps is defined and msp_msp_var.stack is defined
+
+# The data folders are needed to map the docker FS to the hosst FS
+# This can be used to persist ledger and KVS of the node
+- name: Ensure data folders exist
+  include_tasks: create-data-folders.yml
+  loop: "{{ peer_msps }}"
+  loop_control:
+    loop_var: msp_var
+  when: deploy_msps is defined and deploy_msps == true and peer_msps is defined and msp_var.stack is defined
+
+- include_tasks: gen-stack-fabric-console.yml
+  when: deploy_fabric_console is defined and deploy_fabric_console == true
+
+- include_tasks: gen-stack-nginx-fabric-console.yml
+  when: deploy_fabric_console_nginx is defined and deploy_fabric_console_nginx == true

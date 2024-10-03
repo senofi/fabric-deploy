@@ -1,0 +1,24 @@
+---
+- set_fact:
+    msp: "{{ msp_ord_var }}"
+
+- name: Debug Generate Docker stacks file for orderers
+  debug:
+    msg: "Generating for orderers {{ msp.orderers }}"
+
+- name: Debug Generate stack file
+  debug:
+    msg: "Output {{ config_folder }}/stack_{{ msp.stack }}.yaml"
+
+- name: "Generate ordering organizations config for '{{ msp.msp }}'"
+  template:
+    src: "docker/stack_ordering_raft.yaml.j2"
+    dest: "{{ config_folder }}/stack_{{ msp.stack }}.yaml"
+    trim_blocks: no
+    variable_start_string: "[["
+    variable_end_string: "]]"
+
+
+- name: Backup the stack file
+  shell: >
+    cp -r {{ config_folder }}/stack_{{ msp.stack }}.yaml {{ config_folder }}/stack_{{ msp.stack }}_{{ansible_date_time.iso8601_basic_short}}.yaml

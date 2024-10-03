@@ -1,0 +1,44 @@
+---
+# Deploy HLF operations console
+- hosts: "{{ target_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  tasks:
+    - set_fact:
+        msps: "{{ca_msps}}"
+    # - include_role:
+    #     name: msp-remove-stack
+    # - include_role:
+    #     name: msp-remove
+    - include_role:
+        name: ca-root-temp-boot
+      vars:
+        actionTag: prepare
+    - include_role:
+        name: ca-root-boot
+      vars:
+        actionTag: prepare
+    - include_role:
+        name: ca-root-temp-boot
+      vars:
+        actionTag: start
+    - include_role:
+        name: ca-root-temp-boot
+      vars:
+        actionTag: registerEnroll
+    - include_role:
+        name: ca-root-temp-boot
+      vars:
+        actionTag: stop
+    - include_role:
+        name: ca-root-boot
+      vars:
+        actionTag: start
+    - include_role:
+        name: ca-root-boot
+      vars:
+        actionTag: registerEnroll
+    - include_role:
+        name: register-msps
+    - include_role:
+        name: enroll-msps

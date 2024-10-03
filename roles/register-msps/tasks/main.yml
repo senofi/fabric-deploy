@@ -1,0 +1,23 @@
+---
+
+- name: Debug
+  debug:
+    msg: "################## Register users for MSPs Service End ##################"
+
+- name: Debug
+  debug:
+    msg: "################## Register the users of all msps defined in the msps list variable ##################"
+
+- name: Regsiter the users of all msps defined under msps list
+  include_role:
+    name: register-msp-identities
+  vars:
+    register_msp: "{{ reg_msp }}"
+  loop: "{{ msps }}"
+  loop_control:
+    loop_var: reg_msp
+  when: reg_msp.tls_ca is not defined or reg_msp.tls_ca != 'yes'
+
+- name: Debug
+  debug:
+    msg: "################## Register users for msps End ##################"

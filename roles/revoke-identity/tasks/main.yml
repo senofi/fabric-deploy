@@ -1,0 +1,6 @@
+# calls the CA server to revoke the passed identity
+# store the produced CRL on the file system using the passed path
+- include: revoke_from_ca.yml
+  loop: "{{ cas }}"
+  loop_control:
+    loop_var: revoke_ca

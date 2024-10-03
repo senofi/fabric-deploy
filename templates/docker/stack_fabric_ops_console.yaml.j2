@@ -1,0 +1,52 @@
+version: "3.6"
+
+services:
+    fabric-console:
+        image: [[ fabric_console_image ]]
+        ports:
+            - "[[ fabric_console_port ]]:3000"
+        volumes:
+            - [[fabric_console_config_folder_path]]/env/:/home/athena/env/
+            - [[fabric_console_config_folder_path]]/tls/tls.key:/home/athena/tls/tls.key
+            - [[fabric_console_config_folder_path]]/tls/tls.pem:/home/athena/tls/tls.pem
+        environment:
+            - CONFIGURE_FILE=./env/config.yaml
+            - DB_CONNECTION_STRING=http://admin:password@console-couchdb:5984
+            - DB_SYSTEM=athena-system
+            - KEY_FILE_PATH=/home/athena/tls/tls.key
+            - PEM_FILE_PATH=/home/athena/tls/tls.pem
+        networks:
+            - [[ fabric_console_network ]]
+
+    configtxlator:
+        image: hyperledger/fabric-tools{% if fabric_console_fab_img_tag is defined %}:[[ fabric_console_fab_img_tag ]]{% endif %}
+        command: /bin/bash -c "/usr/local/bin/configtxlator start --CORS=*"
+        ports:
+            - "7059:7059"
+        networks:
+            - [[ fabric_console_network ]]
+
+    console-couchdb:
+        image: couchdb:3.1.1
+        environment:
+            - COUCHDB_USER=admin
+            - COUCHDB_PASSWORD=password
+        volumes:
+            - "couch-data:/opt/couchdb/data"
+        ports:
+            - "5984:5984"
+        networks:
+            - [[ fabric_console_network ]]
+volumes:
+    couch-data:
+
+
+networks:
+  [[ fabric_console_network ]]:
+    driver: overlay
+    attachable: true
+    name: [[ fabric_console_network ]]
+    ipam:
+      driver: default
+      config:
+        - subnet: [[ fabric_console_subnet_cidr ]]

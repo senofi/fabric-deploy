@@ -1,0 +1,13 @@
+---
+fabric_user_name: "fabric"
+env_id: test
+root_working_folder: "/srv/fabric"
+fabric_version: 2.5.8
+config_folder: "{{root_working_folder}}/{{env_id}}/config"
+fabric_console_config_folder_path: "{{ config_folder }}/fabric_console"
+fabric_console:
+  network: console
+  stack: console
+  subnet_cidr: 10.2.7.0/24
+  image: ghcr.io/hyperledger-labs/fabric-console:latest
+  fab_img_tag: "{{fabric_version}}"

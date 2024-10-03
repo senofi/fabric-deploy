@@ -1,0 +1,22 @@
+---
+
+- name: Debug
+  debug:
+    msg: "################## Register users for Ordering Service End ##################"
+
+- name: Debug
+  debug:
+    msg: "################## Register the users of all msps defined in the ordering list variable ##################"
+
+- name: Regsiter the users of all msps defined under ordering list
+  include_role:
+    name: register-msp-identities
+  vars:
+    register_msp: "{{ reg_msp }}"
+  loop: "{{ ordering }}"
+  loop_control:
+    loop_var: reg_msp
+
+- name: Debug
+  debug:
+    msg: "################## Register users for Ordering Service End ##################"

@@ -1,0 +1,13 @@
+---
+- set_fact:
+    remove_metric_msp: "{{ msp_msp_var }}"
+
+- name: Remove the metric node service
+  docker_swarm_service:
+    name: "{{ remove_metric_msp.stack }}_prometheus"
+    state: absent
+
+- name: Remove the config secret of the metric nodes service
+  docker_secret:
+    name: "{{ remove_metric_msp.msp }}_prometheus"
+    state: absent

@@ -1,0 +1,8 @@
+---
+# Start the docker stacks
+- hosts: all
+  become: yes
+  become_user: "{{ server_user }}"
+  
+  roles:
+    - start

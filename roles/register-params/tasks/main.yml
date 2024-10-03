@@ -1,0 +1,44 @@
+---
+- set_fact:
+    single_msp: "{{ single_msp_reg }}"
+  when: single_msp_reg is defined
+
+- set_fact:
+    single: "{{ single_var }}"
+
+- name: Debug
+  debug:
+    msg: "################## Register Start  ##################"
+
+- name: Debug
+  debug:
+    msg: "### Register Loop over peer_msps ###"
+
+- include_tasks: register.yml
+  loop: "{{ peer_msps }}"
+  loop_control:
+    loop_var: reg_msp
+  when: peer_msps is defined and single != "singlemsp" and ( reg_msp.tls_ca is undefined or reg_msp.tls_ca != "yes" )
+
+- name: Debug
+  debug:
+    msg: "### Register Loop over orderers ###"
+
+- include_tasks: register.yml
+  loop: "{{ ordering }}"
+  loop_control:
+    loop_var: reg_msp
+  when: ordering is defined and single != "singlemsp" and ( reg_msp.tls_ca is undefined or reg_msp.tls_ca != "yes" )
+
+- name: Debug
+  debug:
+    msg: "### Register Loop over msp {{ single }} ###"
+
+- include_tasks: register.yml
+  vars:
+    reg_msp: "{{ single_msp }}"
+  when: single == "singlemsp"
+
+- name: Debug
+  debug:
+    msg: "################## Register End  ##################"

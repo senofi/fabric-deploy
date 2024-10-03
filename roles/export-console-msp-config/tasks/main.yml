@@ -1,0 +1,111 @@
+---
+
+- name: Load ca cert in Base64 from the file system
+  slurp:
+    src: "{{ local_pki_folder }}/{{ msp_domain }}/users/{{msp_peer_admin_user}}/msp/cacerts/ca.cert"
+  register: loaded_cert_file
+- set_fact:
+    ca_cert: "{{ loaded_cert_file.content }}"
+
+
+- name: Load ca tls cert in Base64 from the file system
+  slurp:
+    src: "{{ local_pki_folder }}/{{ msp_domain }}/users/{{msp_peer_admin_user}}/tls/ca.crt"
+  register: loaded_tlscert_file
+- set_fact:
+    ca_tls_cert: "{{ loaded_tlscert_file.content }}"
+
+- name: Load admin cert in Base64 from the file system
+  slurp:
+    src: "{{ local_pki_folder }}/{{ msp_domain }}/users/{{msp_peer_admin_user}}/msp/signcerts/cert.pem"
+  register: loaded_admincert_file
+- set_fact:
+    msp_admin_cert: "{{ loaded_admincert_file.content }}"
+
+- set_fact:
+    console_export_folder_ca: "{{ data_folder }}/fabric-console/export/ca"
+
+- name: Ensure fabric console export data folder CA
+  file:
+    path: "{{console_export_folder_ca}}"
+    state: directory
+    mode: "u=rwx,g=rwx,o=rwx"
+    owner: "{{ fabric_user_name }}"
+  become: yes
+
+- set_fact:
+    console_export_folder_msp: "{{ data_folder }}/fabric-console/export/msp"
+
+- name: Ensure fabric console export data folder MSP 
+  file:
+    path: "{{console_export_folder_msp}}"
+    state: directory
+    mode: "u=rwx,g=rwx,o=rwx"
+    owner: "{{ fabric_user_name }}"
+  become: yes
+
+- name: "Generate farbic operations console MSP import json {{console_export_folder_msp}}/fabric_console_msp_{{ msp_name }}.json"
+  template:
+    src: "fabric/config-console-msp.json.j2"
+    dest: "{{console_export_folder_msp}}/fabric_console_msp_{{ msp_name }}.json"
+    trim_blocks: no
+    variable_start_string: "[["
+    variable_end_string: "]]"
+
+- name: Backup the MSP config file
+  shell: >
+    cp -r {{console_export_folder_msp}}/fabric_console_msp_{{ msp_name}}.json {{console_export_folder_msp}}/fabric_console_msp_{{ msp_name }}_{{ansible_date_time.iso8601_basic_short}}.json
+
+######### Export Fabric CA profile
+
+- set_fact:
+    ca_json_destination: "{{console_export_folder_ca}}/fabric_console_ca_{{ msp_name }}.json"
+
+- set_fact:
+    ca_endpoint_api_url: "{{ca_api_url}}"
+
+- set_fact:
+    ca_endpoint_ops_url: "{{ca_ops_url}}"
+
+- set_fact:
+    cert_auth_name: "{{ca_name}}"
+
+- name: "Generate farbic operations console CA import json {{ca_json_destination}}"
+  template:
+    src: "fabric/config-console-ca.json.j2"
+    dest: "{{ca_json_destination}}"
+    trim_blocks: no
+    variable_start_string: "[["
+    variable_end_string: "]]"
+
+- name: Backup the TLS CA config file
+  shell: >
+    cp -r {{ca_json_destination}} {{console_export_folder_ca}}/fabric_console_ca_{{ msp_name }}_{{ansible_date_time.iso8601_basic_short}}.json
+
+######### Export TLS Fabric CA profile
+- set_fact:
+    ca_json_destination: "{{console_export_folder_ca}}/fabric_console_tlsca_{{ msp_name }}.json"
+
+- set_fact:
+    ca_endpoint_api_url: "{{caTls_api_url}}"
+
+- set_fact:
+    ca_endpoint_ops_url: "{{caTls_ops_url}}"
+
+- set_fact:
+    cert_auth_name: "{{caTls_name}}"
+
+- set_fact:
+    ca_cert: "{{ca_tls_cert}}"
+
+- name: "Generate farbic operations console TLS CA import json {{ca_json_destination}}"
+  template:
+    src: "fabric/config-console-ca.json.j2"
+    dest: "{{ca_json_destination}}"
+    trim_blocks: no
+    variable_start_string: "[["
+    variable_end_string: "]]"
+
+- name: Backup the TLS CA config file
+  shell: >
+    cp -r {{ca_json_destination}} {{console_export_folder_ca}}/fabric_console_tlsca_{{ msp_name }}_{{ansible_date_time.iso8601_basic_short}}.json

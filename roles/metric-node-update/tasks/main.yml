@@ -1,0 +1,15 @@
+- name: Remove the metric node
+  include_role:
+    name: metric-node-remove
+  loop: "{{ msps }}"
+  loop_control:
+    loop_var: metric_msp  
+  # when: metric_msp.nodes is not defined
+
+- name: Deploy the metric node
+  include_role:
+    name: metric-node-deploy
+  loop: "{{ msps }}"
+  loop_control:
+    loop_var: metric_msp  
+  when: metric_msp.nodes is defined

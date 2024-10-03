@@ -1,0 +1,41 @@
+---
+- set_fact:
+    metric_deploy_msp: "{{ msp_msp_var }}"
+
+- file:
+    path: "{{ config_folder }}/{{ metric_deploy_msp.msp }}"
+    state: directory
+    mode: "u=rwx,g=r"
+    owner: "{{ fabric_user_name }}"
+  become_user: root
+
+- name: "Generate metric node config file'{{ metric_deploy_msp.msp }}'"
+  template:
+    src: "fabric/metric-config.yaml.j2"
+    dest: "{{ config_folder }}/{{ metric_deploy_msp.msp }}/metric_config.yaml"
+    trim_blocks: no
+    variable_start_string: "[["
+    variable_end_string: "]]"
+
+- name: Backup the metric config file
+  shell: >
+    cp -r {{ config_folder }}/{{ metric_deploy_msp.msp }}/metric_config.yaml {{ config_folder }}/{{ metric_deploy_msp.msp }}/metric_config_{{ansible_date_time.iso8601_basic_short}}.yaml
+
+- name: "Generate metric node stack file '{{ metric_deploy_msp.msp }}'"
+  template:
+    src: "docker/stack_metric.yaml.j2"
+    dest: "{{ config_folder }}/stack_metric_{{ metric_deploy_msp.stack }}.yaml"
+    trim_blocks: no
+    variable_start_string: "[["
+    variable_end_string: "]]"
+
+
+- name: Backup the stack file
+  shell: >
+    cp -r {{ config_folder }}/stack_metric_{{ metric_deploy_msp.stack }}.yaml {{ config_folder }}/stack_metric_{{ metric_deploy_msp.stack }}_{{ansible_date_time.iso8601_basic_short}}.yaml
+
+- name: Start swarm stack
+  shell: >
+    bash -l -c "
+      export STACK={{ metric_deploy_msp.stack }}
+      docker stack deploy -c {{ config_folder }}/stack_metric_{{ metric_deploy_msp.stack }}.yaml {{ metric_deploy_msp.stack }} "

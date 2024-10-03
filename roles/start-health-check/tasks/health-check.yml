@@ -1,0 +1,50 @@
+  
+- set_fact:
+    hc_stack: "{{ hc_msp.stack }}"
+  when: hc_msp.stack is defined
+  
+- set_fact:
+    hc_stack: "{{ hc_msp.stack_ca }}"
+  when: hc_msp.stack_ca is defined
+
+- set_fact:
+    hc_net: "{{ hc_msp.network }}"
+  when: hc_msp.network is defined
+  
+- set_fact:
+    hc_net: "{{ hc_msp.network_ca}}"
+  when: hc_msp.network_ca is defined
+
+- set_fact:
+    hc_network: "{{ hc_stack }}_{{ hc_net }}"
+
+- set_fact:
+    hc_port: 8443
+
+- set_fact:
+    hc_host: "{{ hc_node.orderer }}"
+  when: hc_node.orderer is defined
+
+- set_fact:
+    hc_host: "{{ hc_node.ca }}"
+  when: hc_node.ca is defined
+
+- set_fact:
+    hc_host: "{{ hc_node.peer }}"
+  when: hc_node.peer is defined
+
+- set_fact:
+    protocol: "https"
+
+- set_fact:
+    protocol: "http"
+  when: hc_msp.tls_ca is defined and msp.tls_ca == "yes"
+
+- name: Waiting for the node to start on network {{ hc_network }}  and url {{protocol}}://{{hc_host}}:{{hc_port}}/healthz
+  shell: >
+    docker run --network={{ hc_network }} --rm --name curl pstauffer/curl:latest curl {{protocol}}://{{hc_host}}:{{hc_port}}/healthz -k
+  register: hc_json_response
+  ignore_errors: True
+  until:  hc_json_response.stdout.find('{') != -1 and (hc_json_response.stdout | from_json).status is defined and (hc_json_response.stdout | from_json).status == "OK"
+  retries: 120
+  delay: 1

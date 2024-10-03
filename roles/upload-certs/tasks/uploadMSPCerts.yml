@@ -1,0 +1,18 @@
+---
+- set_fact:
+    msp: "{{ msp_var }}"
+
+- name: Create {{ certs_folder }}
+  file:
+    state: directory
+    path: "{{ certs_folder }}"
+    mode: "u=rwx,g=rx,o=rwx"
+    owner: "{{ fabric_user_name }}"
+  become: yes
+  become_user: root
+
+# Upload and unarchive the tar archive with MSP certs to the remote host
+- name: Un archive tar to remote host
+  unarchive:
+    src: "{{ pki_local_folder }}/{{ msp.domain }}/msp-{{ msp.msp }}-{{ msp.domain }}-msp-certs.tar"
+    dest: "{{ certs_folder }}"

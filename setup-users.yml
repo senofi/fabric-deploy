@@ -1,0 +1,7 @@
+---
+- name: Create docker user and fabric user group
+  become: yes
+  hosts: "{{ target_machine }}"
+  tasks:
+    - include_role:
+        name: create-user

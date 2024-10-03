@@ -1,0 +1,76 @@
+---
+#### Bootstrap Fabric CA server
+
+# Create the data folders
+- hosts: ["{{ ca_machine }}", "{{ manager_machine }}"]
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  roles:
+    - setup
+
+# Start the temporary TLS root CA to issue TLS certs for the CA servers
+
+- hosts: "{{ ca_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  vars:
+    actionTag: prepare
+  roles:
+    - role: ca-root-temp-boot
+    - role: ca-root-boot
+
+- hosts: "{{ manager_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  vars:
+    actionTag: start
+  roles:
+    - role: ca-root-temp-boot
+
+- hosts: "{{ ca_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  vars:
+    actionTag: registerEnroll
+  roles:
+    - role: ca-root-temp-boot
+
+- hosts: "{{ manager_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  vars:
+    actionTag: stop
+  roles:
+    - role: ca-root-temp-boot
+
+- hosts: "{{ manager_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  vars:
+    actionTag: start
+  roles:
+    - role: ca-root-boot
+
+- hosts: "{{ ca_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  vars:
+    actionTag: registerEnroll
+  roles:
+    - role: ca-root-boot
+
+- hosts: "{{ manager_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  vars:
+    actionTag: stop
+  roles:
+    - role: ca-root-boot
+
+- hosts: "{{ ca_machine }}"
+  become: yes
+  become_user: "{{ fabric_user_name | default('fabric') }}"
+  roles:
+    - register-msps
+    - enroll-msps
+    - download-certs

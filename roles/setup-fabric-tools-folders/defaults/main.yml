@@ -1,0 +1,10 @@
+---
+fabric_user_name: "fabric"
+env_id: test
+root_working_folder: "/srv/fabric"
+data_folder: "{{root_working_folder}}/{{env_id}}/data"
+config_folder: "{{root_working_folder}}/{{env_id}}/config"
+certs_folder: "{{root_working_folder}}/{{env_id}}/msp_certs"
+
+
+

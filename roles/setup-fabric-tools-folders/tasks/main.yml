@@ -1,0 +1,29 @@
+
+
+---
+- name: "Ensure data folder {{ data_folder }}"
+  file:
+    path: "{{ data_folder }}"
+    state: directory
+    mode: "u=rwx,g=rx,o=rwx"
+    owner: "{{ fabric_user_name }}"
+  become: yes
+  become_user: root
+
+- name: Create {{ config_folder }}/
+  file:
+    state: directory
+    path: "{{ config_folder }}/"
+    mode: "u=rwx,g=rwx,o=rwx"
+    owner: "{{ fabric_user_name }}"
+  become: yes
+  become_user: root
+
+- name: Create {{ certs_folder }}
+  file:
+    state: directory
+    path: "{{ certs_folder }}"
+    mode: "u=rwx,g=rwx,o=rwx"
+    owner: "{{ fabric_user_name }}"
+  become: yes
+  become_user: root

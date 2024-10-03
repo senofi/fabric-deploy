@@ -1,0 +1,31 @@
+---
+- set_fact:
+    msp: "{{ item }}"
+
+#### Copy the MSP certs of MSP to the local machine ####
+- name: Create tar archive with msp certs
+  command: tar -cvf {{ certs_folder }}/msp-{{ msp.msp }}-{{ msp.domain }}-msp-certs.tar {{ msp.domain }}/msp/
+  args:
+    chdir: "{{ certs_folder }}"
+
+- name: Cleanup the certs archive folder
+  file:
+    state: absent
+    path: "{{ pki_local_folder }}/{{ msp.domain }}"
+  sudo: no
+  delegate_to: localhost
+
+- name: Create the certs archive folder
+  file:
+    state: directory
+    path: "{{ pki_local_folder }}/{{ msp.domain }}"
+  sudo: no
+  delegate_to: localhost
+
+- name: Store the certs archive
+  fetch:
+    src: "{{ certs_folder }}/msp-{{ msp.msp }}-{{ msp.domain }}-msp-certs.tar"
+    dest: "{{ pki_local_folder }}/{{ msp.domain }}/"
+    flat: yes
+
+# ##########################################

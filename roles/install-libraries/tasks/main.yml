@@ -1,0 +1,6 @@
+---
+- include_tasks: "install-{{distribution}}.yml"
+  args:
+    apply:
+      become: yes
+

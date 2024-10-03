@@ -1,0 +1,92 @@
+---
+
+- name: Add Docker GPG apt Key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: "add docker repository"
+  apt_repository: repo='deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable' state=present
+
+- name: "install docker"
+  apt: name=docker-ce=5:27.0.1* state=present update_cache=yes install_recommends=yes allow_unauthenticated=yes
+  retries: 3
+  delay: 20
+
+- name: Add Docker group
+  ansible.builtin.group:
+    name: docker
+    state: present
+
+- name: "add docker user to docker group"
+  user: name={{ fabric_user_name }} groups=docker append=yes
+
+- name: "Generate daemon.json for Docker"
+  template:
+    src: "docker/daemon.json.j2"
+    dest: "/etc/docker/daemon.json"
+    trim_blocks: no
+    variable_start_string: "[["
+    variable_end_string: "]]"
+
+- name: "Restart Docker service"
+  service: name=docker state=started
+
+- name: "get docker info"
+  shell: docker info
+  register: docker_info
+  changed_when: False
+
+# Ansible templating depends on ACL
+- name: Install acl
+  apt: pkg=acl
+
+# - name: Install aptitude
+#   apt:
+#     name: aptitude
+#     state: latest
+#     update_cache: true
+
+# - name: Install required system packages
+#   apt:
+#     pkg:
+#       - apt-transport-https
+#       - ca-certificates
+#       - curl
+#       - software-properties-common
+#       - python3-pip
+#       - virtualenv
+#       - python3-setuptools
+#     state: latest
+#     update_cache: true
+
+
+# - name: Install required system packages
+#   apt:
+#     pkg:
+#       - python3-full
+#     state: latest
+#     update_cache: true
+
+# - name: Install Python pip
+#   apt:
+#     name: python-pip
+#     state: present
+
+# - name: Install Python pip3
+#   apt:
+#     name: python3-pip
+#     state: present
+
+# - name: Install docker python library
+#   pip:
+#     name: docker
+
+# - name: Install jsondiff
+#   pip:
+#     name: jsondiff
+
+# - name: Install pyyaml
+#   pip:
+#     name: pyyaml
+

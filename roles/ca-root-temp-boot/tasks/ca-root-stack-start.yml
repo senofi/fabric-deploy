@@ -1,0 +1,23 @@
+---
+- set_fact:
+    msp: "{{ msp_var }}"
+
+- name: Debug
+  debug:
+    msg: "Deploy CA MSP stack  {{ msp }} file {{ config_folder }}/stack_{{ msp.stack_ca }}.yaml"
+
+- name: Start swarm stacks
+  shell: >
+    bash -l -c "
+      export STACK={{ msp.stack_ca }}
+      docker stack deploy -c {{ config_folder }}/stack_{{ msp.stack_ca }}.yaml {{ msp.stack_ca }}"
+
+- name: Waiting for the CA node to start
+  include_role:
+    name: start-health-check
+  vars:
+    hc_node: "{{ start_node }}"
+    hc_msp: "{{ msp }}"
+  loop: "{{ msp.cas }}"
+  loop_control:
+    loop_var: start_node
