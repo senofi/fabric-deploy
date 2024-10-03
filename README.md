@@ -128,6 +128,7 @@ ansible-playbook register-enroll-msp-peer.yml  --extra-vars "@vars/config.yml"
 Note:
 This playbook will register and enroll the MSP peer identity with the MSP CA servers. 
 Run this playbook on the machine where the peer will be running. If the peer machine is different from the CA machine you should make sure to share the certs required to connect to the CA servers.
+The certs are located on the CA machine under the folders {{root_working_folder}}/{{env_id}}/msp_certs and {{root_working_folder}}/{{env_id}}/pki. You may export those folders and their content from the CA machine and copy  to the peer machine (or use a common file share).
 You may change the remote machine by adjusting the target_machine variable.
 
 
@@ -143,14 +144,13 @@ You may change the remote machine by adjusting the target_machine variable.
 
 #### Export MSP, CA, Peer config and users
 
-Run the below playbooks on the machine where the CA servers are running.
-
 Playbook: export-console-msp-admin-users.yml
 Command: 
 ```
 ansible-playbook export-console-msp-admin-users.yml --extra-vars "@vars/config.yml"
 ```
 Note: 
+Run the playbook on the machine where the CA servers are running.
 Generates json files on the remote machine that contains the crypto of the admin users of the Fabric peer and Fabric CA / TLS CA servers..
 The files can be downloaded locally and imported manually inside the fabric operations console wallet.
 The generated json file are:
@@ -165,7 +165,8 @@ Command:
 ```
 ansible-playbook export-console-msp-config.yml --extra-vars "@vars/config.yml"
 ```
-Note: 
+Note:
+Run the playbook on the machine where the CA servers are running.
 Generates json files on the remote machine that contains the definition and connection details of the Fabric CA, Fabric TLS CA and MSP.
 The files can be downloaded locally and imported manually inside the fabric operations console (import organization and import CA nodes).
 
@@ -182,6 +183,7 @@ Command:
 ansible-playbook export-console-peer-config.yml --extra-vars "@vars/config.yml"
 ```
 Note:
+Run the playbook on the machine where the peer is running.
 Generates a json file on the remote machine that contains the definition and connection details of the Fabric peer.
 The file can be downloaded locally and imported manually inside the fabric operations console (import peer node).
 
@@ -197,7 +199,7 @@ The generated json files from the previous step can be downloaded locally from t
 
 You may use the scp command to download all export files locally.
 ```
-scp -rp {{ca_machine}}:/srv/fabric/test/data/fabric-console/export/ .
+scp -rp {{ca_machine/peer_machine}}:/srv/fabric/test/data/fabric-console/export/ .
 ```
 
 The following list represents the imports in fabric operation console
